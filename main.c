@@ -57,7 +57,7 @@ void test(){
     assert(strCmp(cmp, test) == -1);
 
     test = "19";
-    cmp = "";
+    cmp = "138";
     assert(strCmp(test, cmp) == -1);
     assert(strCmp(cmp, test) == 1);
 
