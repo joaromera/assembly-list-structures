@@ -128,8 +128,68 @@ strConcat:
     push rbp
     mov rbp, rsp
 
+    push rdi
+    push rsi
+    call strLen
+    pop rsi
+    pop rdi
+
+    mov rcx, rax
+
+    push rcx
+    push rdi
+    push rsi
+    sub rsp, 8
+    xchg rdi, rsi
+    call strLen
+    add rsp, 8
+    pop rsi
+    pop rdi
+    pop rcx
+    add rcx, rax
+    inc rcx
 
 
+    push rcx
+    push rdi
+    push rsi
+    xchg rcx, rdi
+
+    sub rsp, 8
+    call malloc
+    add rsp, 8
+    pop rsi
+    pop rdi
+    pop rcx
+    dec rcx
+
+    xor rcx, rcx
+    xor rdx, rdx
+
+.concatFirst:
+    cmp byte [rdi + rcx], 0
+    je .concatSecondInit
+    mov r10b, byte [rdi + rcx]
+    mov byte [rax + rcx], r10b
+    inc rcx
+    inc rdx
+    jmp .concatFirst
+
+.concatSecondInit:
+    xor rcx, rcx
+
+.concatSecond:
+    cmp byte [rsi + rcx], 0
+    je .end
+    mov r10b, byte [rsi + rcx]
+    mov byte [rax + rdx], r10b
+    inc rcx
+    inc rdx
+    jmp .concatSecond
+
+
+.end:
+    mov byte [rax + rdx], 0
     pop rbp
     ret
 

@@ -61,8 +61,8 @@ void test(){
     assert(strCmp(test, cmp) == -1);
     assert(strCmp(cmp, test) == 1);
 
-    FILE *pfile = fopen("file","w");
-    strPrint(cmp,pfile);
+    char* cc = strConcat(test, cmp);
+    printf("%s",cc);
 
 }
 
