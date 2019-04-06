@@ -61,9 +61,27 @@ void test(){
     assert(strCmp(test, cmp) == -1);
     assert(strCmp(cmp, test) == 1);
 
-    char* cc = strConcat(test, cmp);
-    printf("%s",cc);
+    char* cc = strConcat(strClone(test), strClone(cmp));
+    assert(strcmp(cc, "19138") == 0);
+    printf("%s\n",cc);
 
+    char* empty_str = "";
+    
+    char* cc1 = strConcat(strClone(empty_str), strClone(empty_str));
+    assert(strcmp(cc1, empty_str) == 0);
+    printf("%s\n",cc1);
+
+    char* non_empty_str = "hello world";
+    
+    char* cc2 = strConcat(strClone(empty_str), strClone(non_empty_str));
+    assert(strcmp(cc2, non_empty_str) == 0);
+    printf("%s\n",cc2);
+
+    char* cc3 = strConcat(strClone(non_empty_str), strClone(empty_str));
+    assert(strcmp(cc3, non_empty_str) == 0);
+    printf("%s\n",cc3);
+
+    list_t* list_test = listNew();
 }
 
 void test_n3tree(FILE *pfile){

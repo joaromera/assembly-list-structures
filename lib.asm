@@ -187,9 +187,19 @@ strConcat:
     inc rdx
     jmp .concatSecond
 
-
 .end:
     mov byte [rax + rdx], 0
+    push rsi
+    push rax
+    call strDelete
+    pop rax
+    pop rsi
+    mov rdi, rsi
+    push rax
+    sub rsp, 8
+    call strDelete
+    add rsp, 8
+    pop rax
     pop rbp
     ret
 
@@ -225,7 +235,21 @@ strPrint:
     ret
 
 
+;typedef struct s_list{
+;   struct s_listElem *first;
+;   struct s_listElem *last;
+;} list_t;
+
+
 listNew:
+    push rbp
+    mov rbp, rsp
+    xor rdi, rdi
+    mov rdi, 16
+    call malloc
+    mov qword [rax], 0
+    mov qword [rax + 8], 0
+    pop rbp
     ret
 
 listAddFirst:
