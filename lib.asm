@@ -355,6 +355,7 @@ listAddLast:
     pop rbp
     ret
 
+
 listAdd:
     ret
 
@@ -362,6 +363,63 @@ listRemove:
     ret
 
 listRemoveFirst:
+    ; rdi <-- *list
+    ; rsi <-- *func_delete
+    push rbp
+    mov rbp, rsp
+
+    cmp qword [rdi + LIST_FIRST_OFFSET], NULL
+    je .end
+
+    mov rdx, qword [rdi + LIST_FIRST_OFFSET]
+    cmp qword [rdx + ELEM_NEXT_OFFSET], NULL
+    je .listHasOneElement
+
+    mov rcx, qword [rdx + ELEM_NEXT_OFFSET]
+    mov qword [rdi + LIST_FIRST_OFFSET], rcx
+
+    mov rdi, qword [rdx + ELEM_DATA_OFFSET]
+    push rdx
+    sub rsp, 8
+    cmp rsi, NULL
+    jne .callRSIfun
+    call free
+    jmp .unstack
+
+.callRSIfun:
+    call [rsi]
+
+.unstack:
+    add rsp, 8
+    pop rdx
+
+    mov rdi, rdx
+    call free
+    jmp .end
+
+.listHasOneElement:
+    mov qword [rdi + LIST_FIRST_OFFSET], NULL
+    mov qword [rdi + LIST_LAST_OFFSET], NULL
+    mov rdi, qword [rdx + ELEM_DATA_OFFSET]
+    push rdx
+    sub rsp, 8
+    cmp rsi, NULL
+    jne .callRSIfun2
+    call free
+    jmp .unstack2
+
+.callRSIfun2:
+    call [rsi]
+
+.unstack2:
+    add rsp, 8
+    pop rdx
+
+    mov rdi, rdx
+    call free
+
+.end:
+    pop rbp
     ret
 
 listRemoveLast:
