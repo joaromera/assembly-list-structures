@@ -311,6 +311,48 @@ listAddFirst:
 
 
 listAddLast:
+    ; rdi <-- *list
+    ; rsi <-- *data
+    push rbp
+    mov rbp, rsp
+    
+    push rdi
+    push rsi
+    mov rdi, ELEM_SIZE
+    call malloc
+    pop rsi
+    pop rdi
+
+    mov qword [rax], rsi
+    mov qword [rax + ELEM_NEXT_OFFSET], 0
+    mov qword [rax + ELEM_PREV_OFFSET], 0
+
+    cmp qword [rdi + LIST_LAST_OFFSET], 0
+    je .firstToAdd
+
+    mov rdx, [rdi + LIST_LAST_OFFSET]
+
+    cmp qword [rdx + ELEM_PREV_OFFSET], 0
+    je .secondToAdd
+
+    mov [rax + ELEM_NEXT_OFFSET], rdx
+    mov [rdx + ELEM_PREV_OFFSET], rax
+    jmp .end
+
+.firstToAdd:
+
+    mov qword [rdi + LIST_FIRST_OFFSET], rax
+    mov qword [rdi + LIST_LAST_OFFSET], rax
+    jmp .end
+
+.secondToAdd:
+
+    mov qword [rdx + ELEM_NEXT_OFFSET], rax
+    mov qword [rax + ELEM_PREV_OFFSET], rdx
+    mov qword [rdi + LIST_LAST_OFFSET], rax
+
+.end:
+    pop rbp
     ret
 
 listAdd:
