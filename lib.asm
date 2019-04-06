@@ -2,6 +2,16 @@ section .data
 
 NULL_STRING dw "NULL"
 
+ELEM_SIZE db 24
+ELEM_DATA_OFFSET db 0
+ELEM_NEXT_OFFSET db 8
+ELEM_PREV_OFFSET db 16
+
+LIST_SIZE db 16
+LIST_FIRST_OFFSET db 0
+LIST_LAST_OFFSET db 8
+
+
 section .rodata
 
 section .text
@@ -245,7 +255,7 @@ listNew:
     push rbp
     mov rbp, rsp
     xor rdi, rdi
-    mov rdi, 16
+    mov rdi, LIST_SIZE
     call malloc
     mov qword [rax], 0
     mov qword [rax + 8], 0
@@ -253,7 +263,52 @@ listNew:
     ret
 
 listAddFirst:
+    ; rdi <-- *list
+    ; rsi <-- *data
+    push rbp
+    mov rbp, rsp
+    
+    push rdi
+    push rsi
+    mov rdi, ELEM_SIZE
+    call malloc
+    pop rsi
+    pop rdi
+
+    mov qword [rax], rsi
+    mov qword [rax + ELEM_NEXT_OFFSET], 0
+    mov qword [rax + ELEM_PREV_OFFSET], 0
+
+    cmp qword [rdi + LIST_FIRST_OFFSET], 0
+    je .firstToAdd
+
+    mov rdx, [rdi + LIST_FIRST_OFFSET]
+
+    cmp qword [rdx + ELEM_NEXT_OFFSET], 0
+    je .secondToAdd
+
+    mov [rax + ELEM_NEXT_OFFSET], rdx
+    mov [rdx + ELEM_PREV_OFFSET], rax
+    jmp .end
+
+.firstToAdd:
+
+    mov qword [rdi + LIST_FIRST_OFFSET], rax
+    mov qword [rdi + LIST_LAST_OFFSET], rax
+    jmp .end
+
+.secondToAdd:
+
+    mov qword [rax + ELEM_NEXT_OFFSET], rdx
+    mov qword [rdx + ELEM_PREV_OFFSET], rax
+    mov qword [rdi + LIST_FIRST_OFFSET], rax
+
+.end:
+    pop rbp
     ret
+
+
+
 
 listAddLast:
     ret
