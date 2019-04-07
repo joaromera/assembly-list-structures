@@ -479,7 +479,52 @@ listRemoveLast:
     pop rbp
     ret
 
+
+
 listDelete:
+    ; rdi <-- *list
+    ; rsi <-- *funcdelete
+    push rbp
+    mov rbp, rsp
+    push r12
+    push r13
+    push r14
+    push r15
+
+    mov r12, rdi
+    mov r13, rsi
+    mov r14, qword [r12 + LIST_FIRST_OFFSET]        ;r14 <-- actual
+
+.loop:
+    cmp r14, NULL
+    je .end
+    mov r15, qword [r14 + ELEM_NEXT_OFFSET]         ;r15 <-- next
+    mov rdi, [r14 + ELEM_DATA_OFFSET]
+    cmp r13, NULL
+    je. useFuncDelete
+    call free
+    jmp .datasMemoryFreed
+
+.useFuncDelete:
+    call r13
+
+.datasMemoryFreed:
+    mov rdi, r14
+    call free
+
+    mov r14, r15
+    mov r15, [r15 + ELEM_NEXT_OFFSET]
+    jmp .loop
+
+.end:
+    mov rdi, r12
+    call free
+
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbp
     ret
 
 listPrint:
