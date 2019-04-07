@@ -1,21 +1,25 @@
 section .data
 
-NULL db 0
-NULL_STRING dw "NULL"
-
-ELEM_SIZE db 24
-ELEM_DATA_OFFSET db 0
-ELEM_NEXT_OFFSET db 8
-ELEM_PREV_OFFSET db 16
-
-LIST_SIZE db 16
-LIST_FIRST_OFFSET db 0
-LIST_LAST_OFFSET db 8
-
+NULL_STRING db 'NULL',0
+OPEN_BRACKET db '[',0
+COMMA db ',',0
+CLOSE_BRACKET db ']',0
+POINTER_FORMAT db '%p',0
 
 section .rodata
 
 section .text
+
+%define NULL 0
+%define ELEM_SIZE 24
+%define ELEM_DATA_OFFSET 0
+%define ELEM_NEXT_OFFSET 8
+%define ELEM_PREV_OFFSET 16
+
+%define LIST_SIZE 16
+%define LIST_FIRST_OFFSET 0
+%define LIST_LAST_OFFSET 8
+
 
 extern malloc
 extern free
@@ -54,7 +58,7 @@ strLen:
     xor rax, rax
 
 .loop:
-    cmp byte [rdi], 0
+    cmp byte [rdi], NULL
     je .end
     inc rax
     inc rdi
@@ -92,7 +96,7 @@ strClone:
     jmp .loop
 
 .end:
-    mov byte [rax + rcx], 0
+    mov byte [rax + rcx], NULL
     pop r14
     pop r13
     pop r12
@@ -109,7 +113,7 @@ strCmp:
     xor rcx, rcx
 
 .loop:
-    cmp byte [rdi + rcx], 0
+    cmp byte [rdi + rcx], NULL
     je .rdiMaybeShortest
     mov dl, byte [rdi + rcx]
     cmp byte [rsi + rcx], dl
@@ -119,7 +123,7 @@ strCmp:
     jmp .loop
 
 .rdiMaybeShortest:
-    cmp byte [rsi + rcx], 0
+    cmp byte [rsi + rcx], NULL
     je .end
     jmp .rdiShortest
 
@@ -178,7 +182,7 @@ strConcat:
     xor rdx, rdx
 
 .concatFirst:
-    cmp byte [rdi + rcx], 0
+    cmp byte [rdi + rcx], NULL
     je .concatSecondInit
     mov r10b, byte [rdi + rcx]
     mov byte [rax + rcx], r10b
@@ -190,7 +194,7 @@ strConcat:
     xor rcx, rcx
 
 .concatSecond:
-    cmp byte [rsi + rcx], 0
+    cmp byte [rsi + rcx], NULL
     je .end
     mov r10b, byte [rsi + rcx]
     mov byte [rax + rdx], r10b
@@ -199,7 +203,7 @@ strConcat:
     jmp .concatSecond
 
 .end:
-    mov byte [rax + rdx], 0
+    mov byte [rax + rdx], NULL
     push rsi
     push rax
     call strDelete
@@ -227,7 +231,7 @@ strPrint:
     push rdi
     push rsi
 
-    cmp byte [rdi], 0
+    cmp byte [rdi], NULL
     je .printNULL
 
     xchg rdi, rsi
@@ -252,8 +256,8 @@ listNew:
     xor rdi, rdi
     mov rdi, LIST_SIZE
     call malloc
-    mov qword [rax], 0
-    mov qword [rax + 8], 0
+    mov qword [rax], NULL
+    mov qword [rax + 8], NULL
     pop rbp
     ret
 
@@ -265,21 +269,22 @@ listAddFirst:
     
     push rdi
     push rsi
+    xor rdi, rdi
     mov rdi, ELEM_SIZE
     call malloc
     pop rsi
     pop rdi
 
     mov qword [rax], rsi
-    mov qword [rax + ELEM_NEXT_OFFSET], 0
-    mov qword [rax + ELEM_PREV_OFFSET], 0
+    mov qword [rax + ELEM_NEXT_OFFSET], NULL
+    mov qword [rax + ELEM_PREV_OFFSET], NULL
 
-    cmp qword [rdi + LIST_FIRST_OFFSET], 0
+    cmp qword [rdi + LIST_FIRST_OFFSET], NULL
     je .firstToAdd
 
     mov rdx, [rdi + LIST_FIRST_OFFSET]
 
-    cmp qword [rdx + ELEM_NEXT_OFFSET], 0
+    cmp qword [rdx + ELEM_NEXT_OFFSET], NULL
     je .secondToAdd
 
     mov [rax + ELEM_NEXT_OFFSET], rdx
@@ -319,15 +324,15 @@ listAddLast:
     pop rdi
 
     mov qword [rax], rsi
-    mov qword [rax + ELEM_NEXT_OFFSET], 0
-    mov qword [rax + ELEM_PREV_OFFSET], 0
+    mov qword [rax + ELEM_NEXT_OFFSET], NULL
+    mov qword [rax + ELEM_PREV_OFFSET], NULL
 
-    cmp qword [rdi + LIST_LAST_OFFSET], 0
+    cmp qword [rdi + LIST_LAST_OFFSET], NULL
     je .firstToAdd
 
     mov rdx, [rdi + LIST_LAST_OFFSET]
 
-    cmp qword [rdx + ELEM_PREV_OFFSET], 0
+    cmp qword [rdx + ELEM_PREV_OFFSET], NULL
     je .secondToAdd
 
     mov [rax + ELEM_NEXT_OFFSET], rdx
@@ -501,7 +506,7 @@ listDelete:
     mov r15, qword [r14 + ELEM_NEXT_OFFSET]         ;r15 <-- next
     mov rdi, [r14 + ELEM_DATA_OFFSET]
     cmp r13, NULL
-    je. useFuncDelete
+    je .useFuncDelete
     call free
     jmp .datasMemoryFreed
 
@@ -528,6 +533,64 @@ listDelete:
     ret
 
 listPrint:
+    ; rdi <-- *list
+    ; rsi <-- *pFile
+    ; rdx <-- *funcPrint
+    push rbp
+    mov rbp, rsp
+    push rbx
+    push r12
+    push r13
+    push r14
+
+    mov r12, rdi
+    mov r13, rsi
+    mov r14, rdx 
+    
+    mov rdi, r13
+    mov rsi, qword OPEN_BRACKET
+    call fprintf
+    
+    cmp qword [r12 + LIST_FIRST_OFFSET], NULL
+    je .end
+    mov rbx, [r12 + LIST_FIRST_OFFSET]
+
+.loop:
+    cmp r14, NULL
+    je .printPointer
+    mov rdi, [rbx + ELEM_DATA_OFFSET]
+    mov rsi, r13
+    call r14
+
+    jmp .nextElement
+
+.printPointer:
+    mov rdi, r13
+    mov rsi, POINTER_FORMAT
+    mov rdx, [rbx + ELEM_DATA_OFFSET]
+    call fprintf
+
+.nextElement:
+    cmp qword [rbx + ELEM_NEXT_OFFSET], NULL
+    je .end
+
+    mov rdi, r13
+    mov rsi, qword COMMA
+    call fprintf
+
+    mov rbx, qword [rbx + ELEM_NEXT_OFFSET]
+    jmp .loop
+
+.end:
+    mov rdi, r13
+    mov rsi, qword CLOSE_BRACKET
+    call fprintf
+
+    pop r14
+    pop r13
+    pop r12
+    pop rbx
+    pop rbp
     ret
 
 n3treeNew:

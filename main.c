@@ -25,22 +25,26 @@ void test(){
     len = strLen(test);
     assert(len == 4);
 
-    // Testing strClone
+    // Testing strClone & strDelete
     test = "";
     char* clone = strClone(test);
     assert(strcmp(test, clone) == 0);
+    strDelete(clone);
 
     test = "A";
     char* clone2 = strClone(test);
     assert(strcmp(test, clone2) == 0);
+    strDelete(clone2);
 
     test = "hola";
     char* clone3 = strClone(test);
     assert(strcmp(test, clone3) == 0);
+    strDelete(clone3);
 
     test = "hola mundo!";
     char* clone4 = strClone(test);
     assert(strcmp(test, clone4) == 0);
+    strDelete(clone4);
 
     // Testing strCmp
     test = "";
@@ -61,27 +65,57 @@ void test(){
     assert(strCmp(test, cmp) == -1);
     assert(strCmp(cmp, test) == 1);
 
+    test = "hola ";
+    cmp = "mundo!";
+
+    // Testing strConcat
     char* cc = strConcat(strClone(test), strClone(cmp));
-    assert(strcmp(cc, "19138") == 0);
+    assert(strcmp(cc, "hola mundo!") == 0);
     printf("%s\n",cc);
+    strDelete(cc);
 
     char* empty_str = "";
     
     char* cc1 = strConcat(strClone(empty_str), strClone(empty_str));
     assert(strcmp(cc1, empty_str) == 0);
     printf("%s\n",cc1);
+    strDelete(cc1);
 
     char* non_empty_str = "hello world";
     
     char* cc2 = strConcat(strClone(empty_str), strClone(non_empty_str));
     assert(strcmp(cc2, non_empty_str) == 0);
     printf("%s\n",cc2);
+    strDelete(cc2);
 
     char* cc3 = strConcat(strClone(non_empty_str), strClone(empty_str));
     assert(strcmp(cc3, non_empty_str) == 0);
     printf("%s\n",cc3);
+    strDelete(cc3);
 
+    // Testing strPrint
+    FILE* pFile = fopen("file", "a");
+    strPrint(strClone(empty_str),pFile);
+    fprintf(pFile, "\n");
+
+    // Testing listNew
     list_t* list_test = listNew();
+    printf("size of list %ld bytes\n", sizeof(*list_test));
+ 
+    // Testing add first with list print and strprint
+    listAddFirst(list_test, strClone(non_empty_str));
+    listPrint(list_test, pFile, NULL);
+    listPrint(list_test, pFile, (funcPrint_t*)& strPrint);
+    fprintf(pFile, "\n");
+    
+    listAddFirst(list_test, strClone(test));
+    listPrint(list_test, pFile, (funcPrint_t*)& strPrint);
+    fprintf(pFile, "\n");
+
+    listPrint(list_test, pFile, NULL);
+    fprintf(pFile, "\n");
+
+    fclose(pFile);
 }
 
 void test_n3tree(FILE *pfile){
