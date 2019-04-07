@@ -109,10 +109,14 @@ void test(){
     fprintf(pFile, "\n");
     
     listAddFirst(list_test, strClone(test));
+    listPrint(list_test, pFile, NULL);
     listPrint(list_test, pFile, (funcPrint_t*)& strPrint);
     fprintf(pFile, "\n");
 
+    // Testing list delete
+    listRemoveLast(list_test, (funcDelete_t*)& strDelete);
     listPrint(list_test, pFile, NULL);
+    listPrint(list_test, pFile, (funcPrint_t*)& strPrint);
     fprintf(pFile, "\n");
 
     fclose(pFile);

@@ -428,59 +428,60 @@ listRemoveLast:
     ; rsi <-- *func_delete
     push rbp
     mov rbp, rsp
+    push r12
+    push r13
+    push r14
+    push r15
 
-    cmp qword [rdi + LIST_LAST_OFFSET], NULL
+    mov r12, rdi
+    mov r13, rsi
+
+    cmp qword [r12 + LIST_LAST_OFFSET], NULL
     je .end
 
-    mov rdx, qword [rdi + LIST_LAST_OFFSET]
-    cmp qword [rdx + ELEM_PREV_OFFSET], NULL
+    mov r14, qword [r12 + LIST_LAST_OFFSET]
+    cmp qword [r14 + ELEM_PREV_OFFSET], NULL
     je .listHasOneElement
 
-    mov rcx, qword [rdx + ELEM_PREV_OFFSET]
-    mov qword [rcx + ELEM_NEXT_OFFSET], NULL
-    mov qword [rdi + LIST_LAST_OFFSET], rcx
+    mov r15, qword [r14 + ELEM_PREV_OFFSET]
+    mov qword [r15 + ELEM_NEXT_OFFSET], NULL
+    mov qword [r12 + LIST_LAST_OFFSET], r15
 
-    mov rdi, qword [rdx + ELEM_DATA_OFFSET]
-    push rdx
-    sub rsp, 8
-    cmp rsi, NULL
+    mov rdi, qword [r14 + ELEM_DATA_OFFSET]
+    cmp r13, NULL
     jne .callRSIfun
     call free
     jmp .unstack
 
 .callRSIfun:
-    call [rsi]
+    call r13
 
 .unstack:
-    add rsp, 8
-    pop rdx
-
     mov rdi, rdx
     call free
     jmp .end
 
 .listHasOneElement:
-    mov qword [rdi + LIST_FIRST_OFFSET], NULL
-    mov qword [rdi + LIST_LAST_OFFSET], NULL
-    mov rdi, qword [rdx + ELEM_DATA_OFFSET]
-    push rdx
-    sub rsp, 8
-    cmp rsi, NULL
+    mov qword [r12 + LIST_FIRST_OFFSET], NULL
+    mov qword [r12 + LIST_LAST_OFFSET], NULL
+    mov rdi, qword [r12 + ELEM_DATA_OFFSET]
+    cmp r13, NULL
     jne .callRSIfun2
     call free
     jmp .unstack2
 
 .callRSIfun2:
-    call [rsi]
+    call r13
 
 .unstack2:
-    add rsp, 8
-    pop rdx
-
-    mov rdi, rdx
+    mov rdi, r12
     call free
 
 .end:
+    pop r15
+    pop r14
+    pop r13
+    pop r12
     pop rbp
     ret
 
