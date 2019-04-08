@@ -1,16 +1,12 @@
 NULL
-[0x1bc74b0]
-[hello world,hello world]
-[0x1bc8b60,0x1bc74b0]
+[][]
+[0xb184b0][hello world]
+[0xb19b60,0xb184b0][hola ,hello world]
+[0xb19b60][hola ]
+[0xb184b0][NULL]
 NULL
-[0x75a4b0][hello world]
-[hola ,hello world]
-[0x75bb60,0x75a4b0]
-NULL
-[0x18d44b0][hello world]
-[hola ,hello world]
-[0x18d5b60,0x18d44b0]
-NULL
-[0x13a24b0][hello world]
-[0x13a3b60,0x13a24b0][hola ,hello world]
-[0x13a3b60][hola ]
+[][]
+[0x179f4b0][hello world]
+[0x17a0b60,0x179f4b0][hola ,hello world]
+[0x17a0b60][hola ]
+[][]

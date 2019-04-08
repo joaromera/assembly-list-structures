@@ -100,8 +100,10 @@ void test(){
 
     // Testing listNew
     list_t* list_test = listNew();
-    printf("size of list %ld bytes\n", sizeof(*list_test));
- 
+    listPrint(list_test, pFile, NULL);
+    listPrint(list_test, pFile, (funcPrint_t*)& strPrint);
+    fprintf(pFile, "\n");
+    
     // Testing add first with list print and strprint
     listAddFirst(list_test, strClone(non_empty_str));
     listPrint(list_test, pFile, NULL);
@@ -114,6 +116,11 @@ void test(){
     fprintf(pFile, "\n");
 
     // Testing list delete
+    listRemoveLast(list_test, (funcDelete_t*)& strDelete);
+    listPrint(list_test, pFile, NULL);
+    listPrint(list_test, pFile, (funcPrint_t*)& strPrint);
+    fprintf(pFile, "\n");
+
     listRemoveLast(list_test, (funcDelete_t*)& strDelete);
     listPrint(list_test, pFile, NULL);
     listPrint(list_test, pFile, (funcPrint_t*)& strPrint);

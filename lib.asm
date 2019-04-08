@@ -457,25 +457,21 @@ listRemoveLast:
     call r13
 
 .unstack:
-    mov rdi, rdx
+    mov rdi, r14
     call free
     jmp .end
 
 .listHasOneElement:
     mov qword [r12 + LIST_FIRST_OFFSET], NULL
     mov qword [r12 + LIST_LAST_OFFSET], NULL
-    mov rdi, qword [r12 + ELEM_DATA_OFFSET]
+    mov rdi, qword [r14 + ELEM_DATA_OFFSET]
     cmp r13, NULL
     jne .callRSIfun2
     call free
-    jmp .unstack2
+    jmp .end
 
 .callRSIfun2:
     call r13
-
-.unstack2:
-    mov rdi, r12
-    call free
 
 .end:
     pop r15
