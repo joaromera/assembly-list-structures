@@ -115,6 +115,11 @@ void test(){
     listPrint(list_test, pFile, (funcPrint_t*)& strPrint);
     fprintf(pFile, "\n");
 
+    listAddFirst(list_test, strClone(non_empty_str));
+    listPrint(list_test, pFile, NULL);
+    listPrint(list_test, pFile, (funcPrint_t*)& strPrint);
+    fprintf(pFile, "\n");
+
     // Testing list delete
     listRemoveLast(list_test, (funcDelete_t*)& strDelete);
     listPrint(list_test, pFile, NULL);
@@ -122,6 +127,43 @@ void test(){
     fprintf(pFile, "\n");
 
     listRemoveLast(list_test, (funcDelete_t*)& strDelete);
+    listPrint(list_test, pFile, NULL);
+    listPrint(list_test, pFile, (funcPrint_t*)& strPrint);
+    fprintf(pFile, "\n");
+
+    listRemoveLast(list_test, (funcDelete_t*)& strDelete);
+    listPrint(list_test, pFile, NULL);
+    listPrint(list_test, pFile, (funcPrint_t*)& strPrint);
+    fprintf(pFile, "\n");
+
+    // Testing add last
+    listAddLast(list_test, strClone(non_empty_str));
+    listPrint(list_test, pFile, NULL);
+    listPrint(list_test, pFile, (funcPrint_t*)& strPrint);
+    fprintf(pFile, "\n");
+    
+    listAddLast(list_test, strClone(test));
+    listPrint(list_test, pFile, NULL);
+    listPrint(list_test, pFile, (funcPrint_t*)& strPrint);
+    fprintf(pFile, "\n");
+
+    listAddLast(list_test, strClone(non_empty_str));
+    listPrint(list_test, pFile, NULL);
+    listPrint(list_test, pFile, (funcPrint_t*)& strPrint);
+    fprintf(pFile, "\n");
+
+    // // Testing list delete
+    listRemoveFirst(list_test, (funcDelete_t*)& strDelete);
+    listPrint(list_test, pFile, NULL);
+    listPrint(list_test, pFile, (funcPrint_t*)& strPrint);
+    fprintf(pFile, "\n");
+
+    listRemoveFirst(list_test, (funcDelete_t*)& strDelete);
+    listPrint(list_test, pFile, NULL);
+    listPrint(list_test, pFile, (funcPrint_t*)& strPrint);
+    fprintf(pFile, "\n");
+
+    listRemoveFirst(list_test, (funcDelete_t*)& strDelete);
     listPrint(list_test, pFile, NULL);
     listPrint(list_test, pFile, (funcPrint_t*)& strPrint);
     fprintf(pFile, "\n");

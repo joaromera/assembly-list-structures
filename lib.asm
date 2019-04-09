@@ -289,6 +289,7 @@ listAddFirst:
 
     mov [rax + ELEM_NEXT_OFFSET], rdx
     mov [rdx + ELEM_PREV_OFFSET], rax
+    mov qword [rdi + LIST_FIRST_OFFSET], rax
     jmp .end
 
 .firstToAdd:
@@ -335,8 +336,8 @@ listAddLast:
     cmp qword [rdx + ELEM_PREV_OFFSET], NULL
     je .secondToAdd
 
-    mov [rax + ELEM_NEXT_OFFSET], rdx
-    mov [rdx + ELEM_PREV_OFFSET], rax
+    mov [rax + ELEM_PREV_OFFSET], rdx
+    mov [rdx + ELEM_NEXT_OFFSET], rax
     jmp .end
 
 .firstToAdd:
@@ -388,7 +389,7 @@ listRemoveFirst:
     jmp .unstack
 
 .callRSIfun:
-    call [rsi]
+    call rsi
 
 .unstack:
     add rsp, 8
@@ -410,7 +411,7 @@ listRemoveFirst:
     jmp .unstack2
 
 .callRSIfun2:
-    call [rsi]
+    call rsi
 
 .unstack2:
     add rsp, 8
@@ -422,6 +423,7 @@ listRemoveFirst:
 .end:
     pop rbp
     ret
+
 
 listRemoveLast:
     ; rdi <-- *list
@@ -451,15 +453,11 @@ listRemoveLast:
     cmp r13, NULL
     jne .callRSIfun
     call free
-    jmp .unstack
+    jmp .freeNode
 
 .callRSIfun:
     call r13
-
-.unstack:
-    mov rdi, r14
-    call free
-    jmp .end
+    jmp .freeNode
 
 .listHasOneElement:
     mov qword [r12 + LIST_FIRST_OFFSET], NULL
@@ -468,11 +466,14 @@ listRemoveLast:
     cmp r13, NULL
     jne .callRSIfun2
     call free
-    jmp .end
+    jmp .freeNode
 
 .callRSIfun2:
     call r13
 
+.freeNode:
+    mov rdi, r14
+    call free
 .end:
     pop r15
     pop r14
