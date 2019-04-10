@@ -1,3 +1,5 @@
+%include "macros.asm"
+
 section .data
 
 NULL_STRING db 'NULL',0
@@ -20,6 +22,14 @@ section .text
 %define LIST_FIRST_OFFSET 0
 %define LIST_LAST_OFFSET 8
 
+%define N3TREE_SIZE 8
+%define N3TREE_FIRST_OFFSET 0
+
+%define N3TREE_ELEM_SIZE 32
+%define N3TREE_ELEM_DATA_OFFSET 0
+%define N3TREE_ELEM_LEFT_OFFSET 8
+%define N3TREE_ELEM_CENTER_OFFSET 16
+%define N3TREE_ELEM_RIGHT_OFFSET 24
 
 extern malloc
 extern free
@@ -140,8 +150,7 @@ strCmp:
     ret
 
 strConcat:
-    push rbp
-    mov rbp, rsp
+    PROLOGUE
 
     push rdi
     push rsi
@@ -215,8 +224,7 @@ strConcat:
     call strDelete
     add rsp, 8
     pop rax
-    pop rbp
-    ret
+    EPILOGUE
 
 strDelete:
     push rbp
@@ -592,10 +600,107 @@ listPrint:
     ret
 
 n3treeNew:
-    ret
+    PROLOGUE
+
+    mov rdi, N3TREE_SIZE
+    call malloc
+    mov qword [rax + N3TREE_FIRST_OFFSET], NULL
+
+    EPILOGUE
 
 n3treeAdd:
+    ; rdi <-- n3tree_t* t
+    ; rsi <-- void* data
+    ; rdx <-- funcCmp_t* fc
+    push rbp
+    mov rbp, rsp
+    push r12
+    push r13
+    push r14
+    sub rsp, 8
+    mov r12, rdi
+    mov r13, rsi
+    mov r14, rdx
+
+    cmp qword [rdi + N3TREE_FIRST_OFFSET], NULL
+    je .firstElem
+
+    mov r12, qword [rdi + N3TREE_FIRST_OFFSET]
+    call search
+    jmp .end
+
+.firstElem:
+    call createNewNodeAndInsert
+    mov qword [r12 + N3TREE_FIRST_OFFSET], rax
+
+.end:
+    add rsp, 8
+    pop r14
+    pop r13
+    pop r12
+    pop rbp
     ret
+
+search:
+    PROLOGUE
+    mov rdi, qword [r12 + N3TREE_ELEM_DATA_OFFSET]
+    mov rsi, r13
+    call r14
+    jl .goLeft
+    jg .goRight
+    call addElemToList
+    EPILOGUE
+
+.goLeft:
+    cmp qword [r12 + N3TREE_ELEM_LEFT_OFFSET], NULL
+    jne .leftNotNull
+    call createNewNodeAndInsert
+    mov qword [r12 + N3TREE_ELEM_LEFT_OFFSET], rax
+    EPILOGUE
+.leftNotNull:
+    mov rdi, qword [r12 + N3TREE_ELEM_LEFT_OFFSET]
+    call search
+    EPILOGUE
+
+.goRight:
+    cmp qword [r12 + N3TREE_ELEM_RIGHT_OFFSET], NULL
+    jne .rightNotNull
+    call createNewNodeAndInsert
+    mov qword [r12 + N3TREE_ELEM_RIGHT_OFFSET], rax
+    EPILOGUE
+.rightNotNull:
+    mov rdi, qword [r12 + N3TREE_ELEM_RIGHT_OFFSET]
+    call search
+    EPILOGUE
+
+
+
+addElemToList:
+    PROLOGUE
+    mov rdi, qword [r12 + N3TREE_ELEM_CENTER_OFFSET]
+    mov rsi, r13
+    call listAddFirst
+    EPILOGUE
+
+
+
+createNewNodeAndInsert:
+    PROLOGUE
+    mov rdi, N3TREE_ELEM_SIZE
+    call malloc
+    
+    mov qword [rax + N3TREE_ELEM_DATA_OFFSET], r13
+    mov qword [rax + N3TREE_ELEM_LEFT_OFFSET], NULL
+    mov qword [rax + N3TREE_ELEM_RIGHT_OFFSET], NULL
+
+    push rax
+    sub rsp, 8
+    call listNew
+    add rsp, 8
+    mov rdi, rax
+    pop rax
+    mov qword [rax + N3TREE_ELEM_CENTER_OFFSET], rdi
+    EPILOGUE
 
 n3treeRemoveEq:
     ret

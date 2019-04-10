@@ -49,16 +49,18 @@ void test(){
     // Testing strCmp
     test = "";
     char* cmp = "";
-    assert(strCmp(test, cmp) == 0);
+    assert(strCmp(strClone(test), strClone(cmp)) == 0);
 
     test = "hola, mundo!";
     cmp = "hola, mundo!";
-    assert(strCmp(test, cmp) == 0);
+    assert(strCmp(strClone(test), strClone(cmp)) == 0);
 
-    test = "a";
-    cmp = "b";
-    assert(strCmp(test, cmp) == 1);
-    assert(strCmp(cmp, test) == -1);
+    test = "1";
+    cmp = "2";
+    assert(strCmp(strClone(test), strClone(cmp)) == 1);
+    assert(strCmp(strClone(cmp), strClone(test)) == -1);
+
+    assert(strCmp(strClone("0"), strClone("0")) == 0);
 
     test = "19";
     cmp = "138";
@@ -169,6 +171,18 @@ void test(){
     fprintf(pFile, "\n");
 
     fclose(pFile);
+
+    
+
+    // Testing N3TREE new
+    n3tree_t* n3tree_test = n3treeNew();
+    n3treeAdd(n3tree_test, strClone("1"),(funcCmp_t*)&strCmp);
+    // n3treeAdd(n3tree_test, strClone("1"),(funcCmp_t*)&strCmp);
+    n3treeAdd(n3tree_test, strClone("0"),(funcCmp_t*)&strCmp);
+    n3treeAdd(n3tree_test, strClone("2"),(funcCmp_t*)&strCmp);
+    // n3treeAdd(n3tree_test, strClone("1"),(funcCmp_t*)&strCmp);
+    n3treeAdd(n3tree_test, strClone("2"),(funcCmp_t*)&strCmp);
+    // n3treeAdd(n3tree_test, strClone("2"),(funcCmp_t*)&strCmp);
 }
 
 void test_n3tree(FILE *pfile){
@@ -188,4 +202,26 @@ int main (void){
     return 0;
 }
 
+/*
 
+%define N3TREE_SIZE 8
+%define N3TREE_FIRST_OFFSET 0
+
+%define N3TREE_ELEM_SIZE 32
+%define N3TREE_ELEM_DATA_OFFSET 0
+%define N3TREE_ELEM_LEFT_OFFSET 0
+%define N3TREE_ELEM_CENTER_OFFSET 0
+%define N3TREE_ELEM_RIGHT_OFFSET 0
+
+typedef struct s_n3tree{
+struct s_n3treeElem *first;
+} n3tree_t;
+
+typedef struct s_n3treeElem{
+void* data;
+struct s_n3treeElem *left;
+struct s_list *center;
+struct s_n3treeElem *right;
+} n3treeElem_t;
+
+*/
