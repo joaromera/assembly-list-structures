@@ -195,18 +195,17 @@ strConcat:
     pop r12
     EPILOGUE
 
+
 strDelete:
     push rbp
     mov rbp, rsp
     call free
     pop rbp
     ret
+
  
 strPrint:
-    push rbp
-    mov rbp, rsp
-    push rdi
-    push rsi
+    PROLOGUE
 
     cmp byte [rdi], NULL
     je .printNULL
@@ -221,10 +220,7 @@ strPrint:
     call fprintf
 
 .end:
-    pop rsi
-    pop rdi
-    pop rbp
-    ret
+    EPILOGUE
 
 
 listNew:
