@@ -426,7 +426,7 @@ listDelete:
     push r14
     push r15
 
-    cmp qword [r12 + LIST_FIRST_OFFSET], NULL
+    cmp qword [rdi + LIST_FIRST_OFFSET], NULL
     je .emptyList
 
     mov r12, rdi
@@ -434,10 +434,10 @@ listDelete:
     mov r14, qword [r12 + LIST_FIRST_OFFSET]        ;r14 <-- actual
 
 .loop:
-    cmp r14, NULL
+    cmp qword [r14 + ELEM_DATA_OFFSET], NULL
     je .end
     mov r15, qword [r14 + ELEM_NEXT_OFFSET]         ;r15 <-- next
-    mov rdi, [r14 + ELEM_DATA_OFFSET]
+    mov rdi, qword [r14 + ELEM_DATA_OFFSET]
     cmp r13, NULL
     jne .useFuncDelete
     call free
@@ -451,7 +451,7 @@ listDelete:
     call free
 
     mov r14, r15
-    mov r15, [r15 + ELEM_NEXT_OFFSET]
+    mov r15, qword [r15 + ELEM_NEXT_OFFSET]
     jmp .loop
 
 .end:
@@ -486,12 +486,12 @@ listPrint:
     
     cmp qword [r12 + LIST_FIRST_OFFSET], NULL
     je .end
-    mov rbx, [r12 + LIST_FIRST_OFFSET]
+    mov rbx, qword [r12 + LIST_FIRST_OFFSET]
 
 .loop:
     cmp r14, NULL
     je .printPointer
-    mov rdi, [rbx + ELEM_DATA_OFFSET]
+    mov rdi, qword [rbx + ELEM_DATA_OFFSET]
     mov rsi, r13
     call r14
 
@@ -500,7 +500,7 @@ listPrint:
 .printPointer:
     mov rdi, r13
     mov rsi, POINTER_FORMAT
-    mov rdx, [rbx + ELEM_DATA_OFFSET]
+    mov rdx, qword [rbx + ELEM_DATA_OFFSET]
     call fprintf
 
 .nextElement:
@@ -645,14 +645,14 @@ n3treeRemoveEq:
 .useFuncDelete:
     ; r13 = funcDelete
     mov r12, qword [r12 + N3TREE_FIRST_OFFSET]
-    call searchAndDelete
+    call searchAndRemoveEQ
 
 .end:
     pop r13
     pop r12
     EPILOGUE
 
-searchAndDelete:
+searchAndRemoveEQ:
     PROLOGUE
     push r12
     push r13
@@ -662,23 +662,88 @@ searchAndDelete:
     mov rdi, qword [r12 + N3TREE_ELEM_CENTER_OFFSET]
     mov rsi, r13
     call listDelete
+    call listNew
+    mov qword [r12 + N3TREE_ELEM_CENTER_OFFSET], rax
 .noList:
     cmp qword [r12 + N3TREE_ELEM_LEFT_OFFSET], NULL
     je .noLeft
     mov r12, qword [r12 + N3TREE_ELEM_LEFT_OFFSET]
-    call searchAndDelete
+    call searchAndRemoveEQ
 .noLeft:
     cmp qword [r12 + N3TREE_ELEM_RIGHT_OFFSET], NULL
     je .noRight
     mov r12, qword [r12 + N3TREE_ELEM_RIGHT_OFFSET]
-    call searchAndDelete
+    call searchAndRemoveEQ
 .noRight:
     pop r13
     pop r12
     EPILOGUE
 
 n3treeDelete:
+    ; rdi <-- n3tree_t* t
+    ; rsi <-- funcDelete_t* fd
+    PROLOGUE
+    push r12
+    push r13
+    push r14
+    sub rsp, 8
+    mov r12, rdi
+    mov r13, rsi
+    mov r14, rdi
+
+    cmp qword [r12 + N3TREE_FIRST_OFFSET], NULL
+    je .end
+
+    cmp r13, NULL
+    jne .useFuncDelete
+    mov r13, free
+
+.useFuncDelete:
+    ; r13 = funcDelete
+    mov r12, qword [r12 + N3TREE_FIRST_OFFSET]
+    call deleteAllNodes
+
+.end:
+    mov rdi, r14
+    call free
+    add rsp, 8
+    pop r14
+    pop r13
+    pop r12
+    EPILOGUE
     ret
+
+
+deleteAllNodes:
+    PROLOGUE
+    push r12
+    push r13
+    push r14
+    sub rsp, 8
+    mov r14, r12
+    cmp qword [r12 + N3TREE_ELEM_CENTER_OFFSET], NULL
+    je .noList
+    mov rdi, qword [r12 + N3TREE_ELEM_CENTER_OFFSET]
+    mov rsi, r13
+    call listDelete
+.noList:
+    cmp qword [r12 + N3TREE_ELEM_LEFT_OFFSET], NULL
+    je .noLeft
+    mov r12, qword [r12 + N3TREE_ELEM_LEFT_OFFSET]
+    call deleteAllNodes
+.noLeft:
+    cmp qword [r12 + N3TREE_ELEM_RIGHT_OFFSET], NULL
+    je .noRight
+    mov r12, qword [r12 + N3TREE_ELEM_RIGHT_OFFSET]
+    call deleteAllNodes
+.noRight:
+    mov rdi, r14
+    call free
+    add rsp, 8
+    pop r14
+    pop r13
+    pop r12
+    EPILOGUE
 
 nTableNew:
     ret

@@ -173,15 +173,16 @@ void test(){
     fclose(pFile);
 
     // Testing N3TREE new
-    // n3tree_t* n3tree_test = n3treeNew();
-    // n3treeAdd(n3tree_test, strClone("1"),(funcCmp_t*)&strCmp);
-    // n3treeRemoveEq(n3tree_test,(funcDelete_t*)&strDelete);
-    // n3treeAdd(n3tree_test, strClone("1"),(funcCmp_t*)&strCmp);
-    // n3treeAdd(n3tree_test, strClone("0"),(funcCmp_t*)&strCmp);
-    // n3treeAdd(n3tree_test, strClone("2"),(funcCmp_t*)&strCmp);
-    // n3treeAdd(n3tree_test, strClone("1"),(funcCmp_t*)&strCmp);
-    // n3treeAdd(n3tree_test, strClone("2"),(funcCmp_t*)&strCmp);
-    // n3treeAdd(n3tree_test, strClone("2"),(funcCmp_t*)&strCmp);
+    n3tree_t* n3tree_test = n3treeNew();
+    n3treeAdd(n3tree_test, strClone("1"),(funcCmp_t*)&strCmp);
+    n3treeRemoveEq(n3tree_test,(funcDelete_t*)&strDelete);
+    n3treeAdd(n3tree_test, strClone("1"),(funcCmp_t*)&strCmp);
+    n3treeAdd(n3tree_test, strClone("0"),(funcCmp_t*)&strCmp);
+    n3treeAdd(n3tree_test, strClone("2"),(funcCmp_t*)&strCmp);
+    n3treeAdd(n3tree_test, strClone("1"),(funcCmp_t*)&strCmp);
+    n3treeAdd(n3tree_test, strClone("2"),(funcCmp_t*)&strCmp);
+    n3treeAdd(n3tree_test, strClone("2"),(funcCmp_t*)&strCmp);
+    n3treeDelete(n3tree_test,(funcDelete_t*)&strDelete);
 }
 
 void test_n3tree(FILE *pfile){
