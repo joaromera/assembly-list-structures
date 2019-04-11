@@ -63,8 +63,6 @@ global nTableDelete
 strLen:
     push rbp
     mov rbp, rsp
-
-    push rdi
     xor rax, rax
 
 .loop:
@@ -75,7 +73,6 @@ strLen:
     jmp .loop
 
 .end:
-    pop rdi
     pop rbp
     ret
 
@@ -83,15 +80,12 @@ strLen:
 strClone:
     push rbp
     mov rbp, rsp
-    push rdi
     push r12
     push r13
-    push r14
 
     mov r12, rdi
     call strLen
     mov r13, rax
-
     mov rdi, rax
     inc rdi
     call malloc
@@ -100,17 +94,15 @@ strClone:
 .loop:
     cmp rcx, r13
     je .end
-    mov r14b, byte [r12 + rcx]
-    mov byte [rax + rcx], r14b
+    mov r10b, byte [r12 + rcx]
+    mov byte [rax + rcx], r10b
     inc rcx
     jmp .loop
 
 .end:
     mov byte [rax + rcx], NULL
-    pop r14
     pop r13
     pop r12
-    pop rdi
     pop rbp
     ret
 
@@ -118,7 +110,6 @@ strClone:
 strCmp:
     push rbp
     mov rbp, rsp
-
     xor rax, rax
     xor rcx, rcx
 
@@ -127,23 +118,22 @@ strCmp:
     je .rdiMaybeShortest
     mov dl, byte [rdi + rcx]
     cmp byte [rsi + rcx], dl
-    jg .rdiShortest
-    jl .rsiShortest
+    jg .rdiSmaller
+    jl .rsiSmaller
     inc rcx
     jmp .loop
 
 .rdiMaybeShortest:
     cmp byte [rsi + rcx], NULL
-    je .end
-    jmp .rdiShortest
+    je .end                         ; a = b
+    jmp .rdiSmaller
 
-.rdiShortest:
+.rdiSmaller:
     mov rax, 1
     jmp .end
 
-.rsiShortest:
+.rsiSmaller:
     mov rax, -1
-    jmp .end
 
 .end:
     pop rbp
@@ -502,6 +492,9 @@ listDelete:
     push r14
     push r15
 
+    cmp qword [r12 + LIST_FIRST_OFFSET], NULL
+    je .emptyList
+
     mov r12, rdi
     mov r13, rsi
     mov r14, qword [r12 + LIST_FIRST_OFFSET]        ;r14 <-- actual
@@ -512,7 +505,7 @@ listDelete:
     mov r15, qword [r14 + ELEM_NEXT_OFFSET]         ;r15 <-- next
     mov rdi, [r14 + ELEM_DATA_OFFSET]
     cmp r13, NULL
-    je .useFuncDelete
+    jne .useFuncDelete
     call free
     jmp .datasMemoryFreed
 
@@ -530,7 +523,7 @@ listDelete:
 .end:
     mov rdi, r12
     call free
-
+.emptyList:
     pop r15
     pop r14
     pop r13
@@ -674,16 +667,12 @@ search:
     call search
     EPILOGUE
 
-
-
 addElemToList:
     PROLOGUE
     mov rdi, qword [r12 + N3TREE_ELEM_CENTER_OFFSET]
     mov rsi, r13
     call listAddFirst
     EPILOGUE
-
-
 
 createNewNodeAndInsert:
     PROLOGUE
@@ -704,7 +693,55 @@ createNewNodeAndInsert:
     EPILOGUE
 
 n3treeRemoveEq:
-    ret
+    ; rdi <-- n3tree_t* t
+    ; rsi <-- funcDelete_t* fd
+    PROLOGUE
+    push r12
+    push r13
+    mov r12, rdi
+    mov r13, rsi
+
+    cmp qword [r12 + N3TREE_FIRST_OFFSET], NULL
+    je .end
+
+    cmp r13, NULL
+    jne .useFuncDelete
+    mov r13, free
+
+.useFuncDelete:
+    ; r13 = funcDelete
+    mov r12, qword [r12 + N3TREE_FIRST_OFFSET]
+    call searchAndDelete
+
+.end:
+    pop r13
+    pop r12
+    EPILOGUE
+
+searchAndDelete:
+    PROLOGUE
+    push r12
+    push r13
+
+    cmp qword [r12 + N3TREE_ELEM_CENTER_OFFSET], NULL
+    je .noList
+    mov rdi, qword [r12 + N3TREE_ELEM_CENTER_OFFSET]
+    mov rsi, r13
+    call listDelete
+.noList:
+    cmp qword [r12 + N3TREE_ELEM_LEFT_OFFSET], NULL
+    je .noLeft
+    mov r12, qword [r12 + N3TREE_ELEM_LEFT_OFFSET]
+    call searchAndDelete
+.noLeft:
+    cmp qword [r12 + N3TREE_ELEM_RIGHT_OFFSET], NULL
+    je .noRight
+    mov r12, qword [r12 + N3TREE_ELEM_RIGHT_OFFSET]
+    call searchAndDelete
+.noRight:
+    pop r13
+    pop r12
+    EPILOGUE
 
 n3treeDelete:
     ret
