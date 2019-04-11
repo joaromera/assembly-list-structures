@@ -160,12 +160,12 @@ void test(){
     listPrint(list_test, pFile, (funcPrint_t*)& strPrint);
     fprintf(pFile, "\n");
 
-    listRemoveFirst(list_test, (funcDelete_t*)& strDelete);
+    listRemoveFirst(list_test, NULL);
     listPrint(list_test, pFile, NULL);
     listPrint(list_test, pFile, (funcPrint_t*)& strPrint);
     fprintf(pFile, "\n");
 
-    listRemoveFirst(list_test, (funcDelete_t*)& strDelete);
+    listRemoveFirst(list_test, NULL);
     listPrint(list_test, pFile, NULL);
     listPrint(list_test, pFile, (funcPrint_t*)& strPrint);
     fprintf(pFile, "\n");
