@@ -264,8 +264,8 @@ listNew:
     xor rdi, rdi
     mov rdi, LIST_SIZE
     call malloc
-    mov qword [rax], NULL
-    mov qword [rax + 8], NULL
+    mov qword [rax + LIST_FIRST_OFFSET], NULL
+    mov qword [rax + LIST_LAST_OFFSET], NULL
     pop rbp
     ret
 
@@ -646,6 +646,7 @@ search:
     mov rdi, qword [r12 + N3TREE_ELEM_DATA_OFFSET]
     mov rsi, r13
     call r14
+    cmp rax, NULL
     jl .goLeft
     jg .goRight
     call addElemToList
@@ -658,7 +659,7 @@ search:
     mov qword [r12 + N3TREE_ELEM_LEFT_OFFSET], rax
     EPILOGUE
 .leftNotNull:
-    mov rdi, qword [r12 + N3TREE_ELEM_LEFT_OFFSET]
+    mov r12, qword [r12 + N3TREE_ELEM_LEFT_OFFSET]
     call search
     EPILOGUE
 
@@ -669,7 +670,7 @@ search:
     mov qword [r12 + N3TREE_ELEM_RIGHT_OFFSET], rax
     EPILOGUE
 .rightNotNull:
-    mov rdi, qword [r12 + N3TREE_ELEM_RIGHT_OFFSET]
+    mov r12, qword [r12 + N3TREE_ELEM_RIGHT_OFFSET]
     call search
     EPILOGUE
 
