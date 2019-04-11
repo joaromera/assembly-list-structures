@@ -141,51 +141,29 @@ strCmp:
 
 strConcat:
     PROLOGUE
-
-    push rdi
-    push rsi
-    call strLen
-    pop rsi
-    pop rdi
-
-    mov rcx, rax
-
-    push rcx
-    push rdi
-    push rsi
+    push r12
+    push r13
+    push r14
     sub rsp, 8
-    xchg rdi, rsi
+
+    mov r12, rdi
+    mov r13, rsi
     call strLen
-    add rsp, 8
-    pop rsi
-    pop rdi
-    pop rcx
-    add rcx, rax
-    inc rcx
-
-
-    push rcx
-    push rdi
-    push rsi
-    xchg rcx, rdi
-
-    sub rsp, 8
+    mov r14, rax
+    mov rdi, r13
+    call strLen
+    add r14, rax
+    inc r14
+    mov rdi, r14
     call malloc
-    add rsp, 8
-    pop rsi
-    pop rdi
-    pop rcx
-    dec rcx
+    mov r14, rax
 
-    xor rcx, rcx
     xor rdx, rdx
-
 .concatFirst:
-    cmp byte [rdi + rcx], NULL
+    cmp byte [r12 + rdx], NULL
     je .concatSecondInit
-    mov r10b, byte [rdi + rcx]
-    mov byte [rax + rcx], r10b
-    inc rcx
+    mov r10b, byte [r12 + rdx]
+    mov byte [r14 + rdx], r10b
     inc rdx
     jmp .concatFirst
 
@@ -193,27 +171,28 @@ strConcat:
     xor rcx, rcx
 
 .concatSecond:
-    cmp byte [rsi + rcx], NULL
+    cmp byte [r13 + rcx], NULL
     je .end
-    mov r10b, byte [rsi + rcx]
-    mov byte [rax + rdx], r10b
+    mov r10b, byte [r13 + rcx]
+    mov byte [r14 + rdx], r10b
     inc rcx
     inc rdx
     jmp .concatSecond
 
 .end:
-    mov byte [rax + rdx], NULL
-    push rsi
-    push rax
+    mov byte [r14 + rdx], NULL
+
+    mov rdi, r12
     call strDelete
-    pop rax
-    pop rsi
-    mov rdi, rsi
-    push rax
-    sub rsp, 8
+    mov rdi, r13
     call strDelete
+
+    mov rax, r14
+
     add rsp, 8
-    pop rax
+    pop r14
+    pop r13
+    pop r12
     EPILOGUE
 
 strDelete:
