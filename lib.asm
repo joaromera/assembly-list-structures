@@ -269,8 +269,6 @@ listAddFirst:
     ret
 
 
-
-
 listAddLast:
     ; rdi <-- *list
     ; rsi <-- *data
@@ -289,25 +287,14 @@ listAddLast:
     mov qword [rax + ELEM_PREV_OFFSET], NULL
 
     cmp qword [rdi + LIST_LAST_OFFSET], NULL
-    je .firstToAdd
-
-    mov rdx, [rdi + LIST_LAST_OFFSET]
-
-    cmp qword [rdx + ELEM_PREV_OFFSET], NULL
-    je .secondToAdd
-
-    mov [rax + ELEM_PREV_OFFSET], rdx
-    mov [rdx + ELEM_NEXT_OFFSET], rax
-    jmp .end
-
-.firstToAdd:
+    jne .notFirstToAdd
 
     mov qword [rdi + LIST_FIRST_OFFSET], rax
     mov qword [rdi + LIST_LAST_OFFSET], rax
     jmp .end
 
-.secondToAdd:
-
+.notFirstToAdd:
+    mov rdx, qword [rdi + LIST_LAST_OFFSET]
     mov qword [rdx + ELEM_NEXT_OFFSET], rax
     mov qword [rax + ELEM_PREV_OFFSET], rdx
     mov qword [rdi + LIST_LAST_OFFSET], rax
