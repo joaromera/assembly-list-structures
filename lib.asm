@@ -242,8 +242,7 @@ listAddFirst:
     
     push rdi
     push rsi
-    xor rdi, rdi
-    mov rdi, ELEM_SIZE
+    mov rdi, qword ELEM_SIZE
     call malloc
     pop rsi
     pop rdi
@@ -253,30 +252,18 @@ listAddFirst:
     mov qword [rax + ELEM_PREV_OFFSET], NULL
 
     cmp qword [rdi + LIST_FIRST_OFFSET], NULL
-    je .firstToAdd
-
-    mov rdx, [rdi + LIST_FIRST_OFFSET]
-
-    cmp qword [rdx + ELEM_NEXT_OFFSET], NULL
-    je .secondToAdd
-
-    mov [rax + ELEM_NEXT_OFFSET], rdx
-    mov [rdx + ELEM_PREV_OFFSET], rax
-    mov qword [rdi + LIST_FIRST_OFFSET], rax
-    jmp .end
-
-.firstToAdd:
+    jne .notFirstToAdd
 
     mov qword [rdi + LIST_FIRST_OFFSET], rax
     mov qword [rdi + LIST_LAST_OFFSET], rax
     jmp .end
 
-.secondToAdd:
-
+.notFirstToAdd:
+    mov rdx, qword [rdi + LIST_FIRST_OFFSET]
     mov qword [rax + ELEM_NEXT_OFFSET], rdx
     mov qword [rdx + ELEM_PREV_OFFSET], rax
     mov qword [rdi + LIST_FIRST_OFFSET], rax
-
+    
 .end:
     pop rbp
     ret
