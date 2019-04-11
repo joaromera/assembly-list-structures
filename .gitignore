@@ -1,4 +1,5 @@
 .vscode/
 .gdb_history
+main
 file
 *.o
