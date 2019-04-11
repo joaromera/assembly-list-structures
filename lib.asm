@@ -203,7 +203,7 @@ strDelete:
     pop rbp
     ret
 
- 
+
 strPrint:
     PROLOGUE
 
@@ -226,13 +226,13 @@ strPrint:
 listNew:
     push rbp
     mov rbp, rsp
-    xor rdi, rdi
-    mov rdi, LIST_SIZE
+    mov rdi, qword LIST_SIZE
     call malloc
     mov qword [rax + LIST_FIRST_OFFSET], NULL
     mov qword [rax + LIST_LAST_OFFSET], NULL
     pop rbp
     ret
+
 
 listAddFirst:
     ; rdi <-- *list
