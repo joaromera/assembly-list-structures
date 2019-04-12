@@ -176,13 +176,18 @@ void test(){
     n3tree_t* n3tree_test = n3treeNew();
     n3treeAdd(n3tree_test, strClone("1"),(funcCmp_t*)&strCmp);
     n3treeRemoveEq(n3tree_test,(funcDelete_t*)&strDelete);
-    n3treeAdd(n3tree_test, strClone("1"),(funcCmp_t*)&strCmp);
+    n3treeAdd(n3tree_test, strClone("4"),(funcCmp_t*)&strCmp);
+    n3treeAdd(n3tree_test, strClone("8"),(funcCmp_t*)&strCmp);
+    n3treeAdd(n3tree_test, strClone("2"),(funcCmp_t*)&strCmp);
     n3treeAdd(n3tree_test, strClone("0"),(funcCmp_t*)&strCmp);
-    n3treeAdd(n3tree_test, strClone("2"),(funcCmp_t*)&strCmp);
-    n3treeAdd(n3tree_test, strClone("1"),(funcCmp_t*)&strCmp);
-    n3treeAdd(n3tree_test, strClone("2"),(funcCmp_t*)&strCmp);
-    n3treeAdd(n3tree_test, strClone("2"),(funcCmp_t*)&strCmp);
+    n3treeAdd(n3tree_test, strClone("3"),(funcCmp_t*)&strCmp);
+    n3treeAdd(n3tree_test, strClone("9"),(funcCmp_t*)&strCmp);
     n3treeDelete(n3tree_test,(funcDelete_t*)&strDelete);
+
+    n3tree_t* n3tree_test2 = n3treeNew();
+    n3treeAdd(n3tree_test2, strClone("1"),(funcCmp_t*)&strCmp);
+    n3treeAdd(n3tree_test2, strClone("1"),(funcCmp_t*)&strCmp);
+    n3treeDelete(n3tree_test2,(funcDelete_t*)&strDelete);
 }
 
 void test_n3tree(FILE *pfile){
@@ -194,34 +199,10 @@ void test_nTable(FILE *pfile){
 }
 
 int main (void){
-    FILE *pfile = fopen("salida.caso.propios.txt","w");
+    // FILE *pfile = fopen("salida.caso.propios.txt","w");
     test();
-    test_n3tree(pfile);
-    test_nTable(pfile);
-    fclose(pfile);
+    // test_n3tree(pfile);
+    // test_nTable(pfile);
+    // fclose(pfile);
     return 0;
 }
-
-/*
-
-%define N3TREE_SIZE 8
-%define N3TREE_FIRST_OFFSET 0
-
-%define N3TREE_ELEM_SIZE 32
-%define N3TREE_ELEM_DATA_OFFSET 0
-%define N3TREE_ELEM_LEFT_OFFSET 0
-%define N3TREE_ELEM_CENTER_OFFSET 0
-%define N3TREE_ELEM_RIGHT_OFFSET 0
-
-typedef struct s_n3tree{
-struct s_n3treeElem *first;
-} n3tree_t;
-
-typedef struct s_n3treeElem{
-void* data;
-struct s_n3treeElem *left;
-struct s_list *center;
-struct s_n3treeElem *right;
-} n3treeElem_t;
-
-*/

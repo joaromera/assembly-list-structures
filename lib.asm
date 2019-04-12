@@ -1,5 +1,3 @@
-%include "macros.asm"
-
 section .data
 
 NULL_STRING db 'NULL',0
@@ -140,7 +138,8 @@ strCmp:
     ret
 
 strConcat:
-    PROLOGUE
+    push rbp
+    mov rbp, rsp
     push r12
     push r13
     push r14
@@ -193,7 +192,8 @@ strConcat:
     pop r14
     pop r13
     pop r12
-    EPILOGUE
+    pop rbp
+    ret
 
 
 strDelete:
@@ -205,7 +205,8 @@ strDelete:
 
 
 strPrint:
-    PROLOGUE
+    push rbp
+    mov rbp, rsp
 
     cmp byte [rdi], NULL
     je .printNULL
@@ -220,7 +221,8 @@ strPrint:
     call fprintf
 
 .end:
-    EPILOGUE
+    pop rbp
+    ret
 
 
 listNew:
@@ -426,30 +428,24 @@ listDelete:
     push r14
     push r15
 
-    cmp qword [rdi + LIST_FIRST_OFFSET], NULL
-    je .emptyList
-
     mov r12, rdi
+    cmp qword [r12 + LIST_FIRST_OFFSET], NULL
+    je .end
+
     mov r13, rsi
-    mov r14, qword [r12 + LIST_FIRST_OFFSET]        ;r14 <-- actual
+    cmp r13, NULL
+    jne .useFuncDelete
+    mov r13, free
+
+.useFuncDelete:
+    mov r14, qword [r12 + LIST_FIRST_OFFSET]
 
 .loop:
-    cmp qword [r14 + ELEM_DATA_OFFSET], NULL
+    cmp qword [r14 + ELEM_NEXT_OFFSET], NULL
     je .end
     mov r15, qword [r14 + ELEM_NEXT_OFFSET]         ;r15 <-- next
     mov rdi, qword [r14 + ELEM_DATA_OFFSET]
-    cmp r13, NULL
-    jne .useFuncDelete
-    call free
-    jmp .datasMemoryFreed
-
-.useFuncDelete:
     call r13
-
-.datasMemoryFreed:
-    mov rdi, r14
-    call free
-
     mov r14, r15
     mov r15, qword [r15 + ELEM_NEXT_OFFSET]
     jmp .loop
@@ -457,7 +453,6 @@ listDelete:
 .end:
     mov rdi, r12
     call free
-.emptyList:
     pop r15
     pop r14
     pop r13
@@ -527,13 +522,15 @@ listPrint:
     ret
 
 n3treeNew:
-    PROLOGUE
+    push rbp
+    mov rbp, rsp
 
     mov rdi, N3TREE_SIZE
     call malloc
     mov qword [rax + N3TREE_FIRST_OFFSET], NULL
 
-    EPILOGUE
+    pop rbp
+    ret
 
 n3treeAdd:
     ; rdi <-- n3tree_t* t
@@ -569,7 +566,8 @@ n3treeAdd:
     ret
 
 search:
-    PROLOGUE
+    push rbp
+    mov rbp, rsp
     mov rdi, qword [r12 + N3TREE_ELEM_DATA_OFFSET]
     mov rsi, r13
     call r14
@@ -577,39 +575,47 @@ search:
     jl .goLeft
     jg .goRight
     call addElemToList
-    EPILOGUE
+    pop rbp
+    ret
 
 .goLeft:
     cmp qword [r12 + N3TREE_ELEM_LEFT_OFFSET], NULL
     jne .leftNotNull
     call createNewNodeAndInsert
     mov qword [r12 + N3TREE_ELEM_LEFT_OFFSET], rax
-    EPILOGUE
+    pop rbp
+    ret
 .leftNotNull:
     mov r12, qword [r12 + N3TREE_ELEM_LEFT_OFFSET]
     call search
-    EPILOGUE
+    pop rbp
+    ret
 
 .goRight:
     cmp qword [r12 + N3TREE_ELEM_RIGHT_OFFSET], NULL
     jne .rightNotNull
     call createNewNodeAndInsert
     mov qword [r12 + N3TREE_ELEM_RIGHT_OFFSET], rax
-    EPILOGUE
+    pop rbp
+    ret
 .rightNotNull:
     mov r12, qword [r12 + N3TREE_ELEM_RIGHT_OFFSET]
     call search
-    EPILOGUE
+    pop rbp
+    ret
 
 addElemToList:
-    PROLOGUE
+    push rbp
+    mov rbp, rsp
     mov rdi, qword [r12 + N3TREE_ELEM_CENTER_OFFSET]
     mov rsi, r13
     call listAddFirst
-    EPILOGUE
+    pop rbp
+    ret
 
 createNewNodeAndInsert:
-    PROLOGUE
+    push rbp
+    mov rbp, rsp
     mov rdi, N3TREE_ELEM_SIZE
     call malloc
     
@@ -620,16 +626,18 @@ createNewNodeAndInsert:
     push rax
     sub rsp, 8
     call listNew
-    add rsp, 8
     mov rdi, rax
+    add rsp, 8
     pop rax
     mov qword [rax + N3TREE_ELEM_CENTER_OFFSET], rdi
-    EPILOGUE
+    pop rbp
+    ret
 
 n3treeRemoveEq:
     ; rdi <-- n3tree_t* t
     ; rsi <-- funcDelete_t* fd
-    PROLOGUE
+    push rbp
+    mov rbp, rsp
     push r12
     push r13
     mov r12, rdi
@@ -650,10 +658,12 @@ n3treeRemoveEq:
 .end:
     pop r13
     pop r12
-    EPILOGUE
+    pop rbp
+    ret
 
 searchAndRemoveEQ:
-    PROLOGUE
+    push rbp
+    mov rbp, rsp
     push r12
     push r13
 
@@ -677,12 +687,14 @@ searchAndRemoveEQ:
 .noRight:
     pop r13
     pop r12
-    EPILOGUE
+    pop rbp
+    ret
 
 n3treeDelete:
     ; rdi <-- n3tree_t* t
     ; rsi <-- funcDelete_t* fd
-    PROLOGUE
+    push rbp
+    mov rbp, rsp
     push r12
     push r13
     push r14
@@ -710,12 +722,13 @@ n3treeDelete:
     pop r14
     pop r13
     pop r12
-    EPILOGUE
+    pop rbp
     ret
 
 
 deleteAllNodes:
-    PROLOGUE
+    push rbp
+    mov rbp, rsp
     push r12
     push r13
     push r14
@@ -743,7 +756,8 @@ deleteAllNodes:
     pop r14
     pop r13
     pop r12
-    EPILOGUE
+    pop rbp
+    ret
 
 nTableNew:
     ret
