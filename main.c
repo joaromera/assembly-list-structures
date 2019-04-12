@@ -195,6 +195,14 @@ void test(){
 
     // NTABLE
     nTable_t *n = nTableNew(32);
+    char* strings[10] = {"aa","bb","dd","ff","00","zz","cc","ee","gg","hh"};
+    for(int s=0;s<32;s++)
+    {
+        for(int i=0;i<10;i++)
+        {
+            nTableAdd(n, s, strClone(strings[i]), (funcCmp_t*)&strCmp);
+        }
+    }
 }
 
 void test_n3tree(FILE *pfile){

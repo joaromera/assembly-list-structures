@@ -808,6 +808,22 @@ nTableNew:
     ret
 
 nTableAdd:
+    push rbp
+    mov rbp, rsp
+    push r12
+    sub rsp, 8
+    mov r12, qword [rdi + NTABLE_LIST_OFFSET]
+    shl rsi, 3
+    add r12, rsi
+    ;(nTable_t* t, uint32_t slot, void* data, funcCmp_t* fc)
+    ;listAdd(list_t* l, void* data, funcCmp_t* fc)
+    mov rdi, qword [r12 + rsi]
+    mov rsi, rdx
+    mov rdx, rcx
+    call listAdd
+    add rsp, 8
+    pop r12
+    pop rbp
     ret
     
 nTableRemoveSlot:
