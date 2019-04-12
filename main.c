@@ -175,6 +175,8 @@ void test(){
     // Testing N3TREE new
     n3tree_t* n3tree_test = n3treeNew();
     n3treeAdd(n3tree_test, strClone("1"),(funcCmp_t*)&strCmp);
+
+    // Test Remove Eq
     n3treeRemoveEq(n3tree_test,(funcDelete_t*)&strDelete);
     n3treeAdd(n3tree_test, strClone("4"),(funcCmp_t*)&strCmp);
     n3treeAdd(n3tree_test, strClone("8"),(funcCmp_t*)&strCmp);
@@ -182,12 +184,17 @@ void test(){
     n3treeAdd(n3tree_test, strClone("0"),(funcCmp_t*)&strCmp);
     n3treeAdd(n3tree_test, strClone("3"),(funcCmp_t*)&strCmp);
     n3treeAdd(n3tree_test, strClone("9"),(funcCmp_t*)&strCmp);
+
+    // Test delete
     n3treeDelete(n3tree_test,(funcDelete_t*)&strDelete);
 
     n3tree_t* n3tree_test2 = n3treeNew();
     n3treeAdd(n3tree_test2, strClone("1"),(funcCmp_t*)&strCmp);
     n3treeAdd(n3tree_test2, strClone("1"),(funcCmp_t*)&strCmp);
     n3treeDelete(n3tree_test2,(funcDelete_t*)&strDelete);
+
+    // NTABLE
+    nTable_t *n = nTableNew(32);
 }
 
 void test_n3tree(FILE *pfile){

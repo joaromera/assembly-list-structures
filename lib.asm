@@ -11,6 +11,8 @@ section .rodata
 section .text
 
 %define NULL 0
+%define POINTER_SIZE 8
+
 %define ELEM_SIZE 24
 %define ELEM_DATA_OFFSET 0
 %define ELEM_NEXT_OFFSET 8
@@ -28,6 +30,10 @@ section .text
 %define N3TREE_ELEM_LEFT_OFFSET 8
 %define N3TREE_ELEM_CENTER_OFFSET 16
 %define N3TREE_ELEM_RIGHT_OFFSET 24
+
+%define NTABLE_SIZE 16
+%define NTABLE_LIST_OFFSET 0
+%define NTABLE_SIZE_OFFSET 8
 
 extern malloc
 extern free
@@ -760,6 +766,45 @@ deleteAllNodes:
     ret
 
 nTableNew:
+    push rbp
+    mov rbp, rsp
+    push r12
+    push r13
+    push r14
+    push r15
+
+    mov r12, rdi                                    ; r12 size
+    mov rdi, NTABLE_SIZE
+    call malloc
+    mov qword [rax + NTABLE_SIZE_OFFSET], r12
+    mov r13, rax                                    ; r13 *ntable
+
+    shl r12, 3
+    mov rdi, r12
+    call malloc
+    mov r14, rax                                    ; r14 *listarray
+
+    xor r15, r15
+.loop:
+    cmp r15, r12
+    je .end
+    call listNew
+    mov qword [r14 + r15], rax
+    add r15, 8
+    jmp .loop
+
+.end:
+    mov rdi, POINTER_SIZE
+    call malloc
+    mov qword [rax], r14
+    mov qword [r13 + NTABLE_LIST_OFFSET], rax
+    mov rax, r13
+
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbp
     ret
 
 nTableAdd:
