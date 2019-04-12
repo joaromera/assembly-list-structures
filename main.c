@@ -203,6 +203,7 @@ void test(){
             nTableAdd(n, s, strClone(strings[i]), (funcCmp_t*)&strCmp);
         }
     }
+    nTableRemoveSlot(n, 1, strClone(strings[0]), (funcCmp_t*)&strCmp, (funcDelete_t*)&strDelete);
 }
 
 void test_n3tree(FILE *pfile){

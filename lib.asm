@@ -827,10 +827,47 @@ nTableAdd:
     ret
     
 nTableRemoveSlot:
+;(nTable_t* t, uint32_t slot, void* data, funcCmp_t* fc,
+ ;     funcDelete_t* fd)
+    ; rdi <-- nTable_t* t
+    ; rsi <-- uint32_t slot
+    ; rdx <-- void* data
+    ; rcx <-- funcCmp_t* fc
+    ; r8  <-- funcDelete_t* fd
+    push rbp
+    mov rbp, rsp
+    mov rax, qword [rdi + NTABLE_LIST_OFFSET]
+    shl rsi, 3
+    add rax, rsi
+    ;listRemove(list_t* l, void* data, funcCmp_t* fc, funcDelete_t* fd)
+    mov rdi, qword [rax]
+    mov rsi, rdx
+    mov rdx, rcx
+    mov rcx, r8
+    call listRemove
+    pop rbp
     ret
     
-nTableDeleteSlot:
+nTableDeleteSlot:       ;(nTable_t* t, uint32_t slot, funcDelete_t* fd)
+    push rbp
+    mov rbp, rsp
+    push r12
+    sub rsp, 8
+    mov r12, qword [rdi + NTABLE_LIST_OFFSET]
+    shl rsi, 3
+    add r12, rsi
+    ;listDelete(list_t* l, funcDelete_t* fd)
+    mov rdi, qword [r12]
+    mov rsi, rdx
+    call listDelete
+    mov rdi, LIST_SIZE
+    call listNew
+    mov qword [r12], rax
+    add rsp, 8
+    pop rsp
+    pop rbp
     ret
+
 
 nTableDelete:
     ret
