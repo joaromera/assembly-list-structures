@@ -152,6 +152,9 @@ void test(){
     listAddLast(list_test, strClone(non_empty_str));
     listPrint(list_test, pFile, NULL);
     listPrint(list_test, pFile, (funcPrint_t*)& strPrint);
+    FILE *pr = fopen("printRev","w");
+    listPrintReverse(list_test, pr, (funcPrint_t*)& strPrint);
+    fclose(pr);
     fprintf(pFile, "\n");
 
     // // Testing list delete
@@ -168,6 +171,7 @@ void test(){
     listRemoveFirst(list_test, NULL);
     listPrint(list_test, pFile, NULL);
     listPrint(list_test, pFile, (funcPrint_t*)& strPrint);
+    listDelete(list_test, (funcDelete_t*)& strDelete);
     fprintf(pFile, "\n");
 
     fclose(pFile);
@@ -183,8 +187,15 @@ void test(){
     n3treeAdd(n3tree_test, strClone("2"),(funcCmp_t*)&strCmp);
     n3treeAdd(n3tree_test, strClone("0"),(funcCmp_t*)&strCmp);
     n3treeAdd(n3tree_test, strClone("3"),(funcCmp_t*)&strCmp);
+    n3treeAdd(n3tree_test, strClone("3"),(funcCmp_t*)&strCmp);
+    n3treeAdd(n3tree_test, strClone("3"),(funcCmp_t*)&strCmp);
+    n3treeAdd(n3tree_test, strClone("3"),(funcCmp_t*)&strCmp);
+    n3treeAdd(n3tree_test, strClone("3"),(funcCmp_t*)&strCmp);
     n3treeAdd(n3tree_test, strClone("9"),(funcCmp_t*)&strCmp);
 
+    FILE* ntpt = fopen("n3treeprint","w");
+    n3treePrint(n3tree_test, ntpt, (funcPrint_t*)& strPrint);
+    fclose(ntpt);
     // Test delete
     n3treeDelete(n3tree_test,(funcDelete_t*)&strDelete);
 
@@ -203,22 +214,35 @@ void test(){
             nTableAdd(n, s, strClone(strings[i]), (funcCmp_t*)&strCmp);
         }
     }
-    nTableRemoveSlot(n, 1, strClone(strings[0]), (funcCmp_t*)&strCmp, (funcDelete_t*)&strDelete);
+    // nTableRemoveSlot(n, 1, strClone(strings[0]), (funcCmp_t*)&strCmp, (funcDelete_t*)&strDelete);
+    // nTableDelete(n, (funcDelete_t*)&strDelete);
 }
 
 void test_n3tree(FILE *pfile){
-
+    n3tree_t* n3t = n3treeNew();
+    char* strings[10] = {"1","2","3","1","2","3","1","2","3"};
+    for(int i = 0; i < 10; ++i)
+    {
+        n3treeAdd(n3t, strClone(strings[i]), (funcCmp_t*)&strCmp);
+    }
+    n3treePrint(n3t, pfile, (funcPrint_t*) &strPrint);
 }
 
 void test_nTable(FILE *pfile){
-    
+    nTable_t *nt = nTableNew(33);
+    char* strings[10] = {"hola",","," ","mundo","!","Hello",", ","awesome","world","!"};
+    for(int i = 0; i < 33; ++i)
+    {
+        nTableAdd(nt, i, strClone(strings[i % 33]), (funcCmp_t*) &strCmp);
+    }
+    nTablePrint(nt, pfile, (funcPrint_t*) &strPrint);
 }
 
 int main (void){
-    // FILE *pfile = fopen("salida.caso.propios.txt","w");
-    test();
-    // test_n3tree(pfile);
+    FILE *pfile = fopen("salida.caso.propios.txt","w");
+    // test();
+    test_n3tree(pfile);
     // test_nTable(pfile);
-    // fclose(pfile);
+    fclose(pfile);
     return 0;
 }

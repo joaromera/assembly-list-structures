@@ -864,10 +864,38 @@ nTableDeleteSlot:       ;(nTable_t* t, uint32_t slot, funcDelete_t* fd)
     call listNew
     mov qword [r12], rax
     add rsp, 8
-    pop rsp
+    pop r12
     pop rbp
     ret
 
 
 nTableDelete:
+    ; rdi <-- nTable_t* t
+    ; rsi <-- funcDelete_t* fd
+    push rbp
+    mov rbp, rsp
+    push r12
+    push r13
+    mov r12, qword [rdi + NTABLE_LIST_OFFSET]
+    mov r13, qword [rdi + NTABLE_SIZE_OFFSET]
+    xor r14, r14
+.loop:
+    cmp r14, r13
+    je .end
+
+    ;listDelete(list_t* l, funcDelete_t* fd)
+    mov rdi, qword [r12]
+    mov rsi, rdx
+    call listDelete
+    mov rdi, LIST_SIZE
+    call listNew
+    mov qword [r12], rax
+
+    add qword r12, POINTER_SIZE
+    inc r14
+    jmp .loop
+.end:
+    pop r13
+    pop r12
+    pop rbp
     ret
