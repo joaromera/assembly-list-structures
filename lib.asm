@@ -254,9 +254,14 @@ listAddFirst:
     pop rsi
     pop rdi
 
-    mov qword [rax], rsi
+    mov qword [rax + ELEM_DATA_OFFSET], rsi
     mov qword [rax + ELEM_NEXT_OFFSET], NULL
     mov qword [rax + ELEM_PREV_OFFSET], NULL
+    ; OK!!!!!
+
+    ; rdi la lista
+
+
 
     cmp qword [rdi + LIST_FIRST_OFFSET], NULL
     jne .notFirstToAdd

@@ -238,6 +238,54 @@ void test_nTable(FILE *pfile){
     nTablePrint(nt, pfile, (funcPrint_t*) &strPrint);
 }
 
+void examine_tree(n3treeElem_t* elem)
+{
+    if (elem == NULL) return;
+    examine_tree(elem->left);
+    print_tri(elem);
+    printf("\n");
+    examine_tree(elem->right);
+}
+
+void print_tri(n3treeElem_t* elem)
+{
+    printf("\tData at %p\t has: %p\t is: %s\n", &elem->data, elem->data, elem->data);
+    printf("\tLeft at %p\t has: %p\n", &elem->left, elem->left);
+    printf("\tCenter at %p\t has: %p\n", &elem->center, elem->center);
+    examine_list(elem->center);
+    printf("\tRight at %p\t has: %p\n", &elem->right, elem->right);
+}
+
+void examine_list(list_t* l)
+{
+    // printf("\tList at: %p\t\t\n", l);
+    printf("\t\tFirst at: %p\t is:\t%p\n", &l->first, l->first);
+    printf("\t\tLast at: %p\t is:\t%p\n", &l->last, l->last);
+    
+
+    listElem_t* elem = l->first;
+    if (elem != NULL) {
+        printf("\t\t\tElem->data at: %p\t addr: %p\tis %s\n", &elem->data, elem->data, elem->data);
+        printf("\t\t\tElem->next at: %p\t addr: %p\t\n", &elem->next, elem->next);
+        printf("\t\t\tElem->prev at: %p\t addr: %p\t\n", &elem->prev, elem->prev);
+        printf("\n");
+        elem = elem->next;
+    }
+
+    while (elem != NULL) {
+        printf("\t\t\tElem->data at: %p\t addr: %p\tis %s\n", &elem->data, elem->data, elem->data);
+        printf("\t\t\tElem->next at: %p\t addr: %p\t\n", &elem->next, elem->next);
+        printf("\t\t\tElem->prev at: %p\t addr: %p\t\n", &elem->prev, elem->prev);
+        printf("\n");
+        elem = elem->next;
+    }
+}
+
+void examine_str(char* str)
+{
+    printf("%15p\t%15s\n", str);
+}
+
 int main (void){
     // FILE *pfile = fopen("salida.caso.propios.txt","w");
     // test();
@@ -245,23 +293,50 @@ int main (void){
     // test_nTable(pfile);
     // fclose(pfile);
     
-    FILE* file = fopen("test","w");
+    // FILE* file = fopen("test","w");
     
-    n3tree_t* test = n3treeNew();
-    n3treeAdd(test, strClone("a"), (funcCmp_t*) &strCmp);
-    n3treeAdd(test, strClone("a"), (funcCmp_t*) &strCmp);
-    n3treeAdd(test, strClone("a"), (funcCmp_t*) &strCmp);
-    n3treeAdd(test, strClone("b"), (funcCmp_t*) &strCmp);
-    n3treeAdd(test, strClone("b"), (funcCmp_t*) &strCmp);
-    n3treeAdd(test, strClone("b"), (funcCmp_t*) &strCmp);
-    n3treeAdd(test, strClone("A"), (funcCmp_t*) &strCmp);
+    // n3tree_t* test = n3treeNew();
+    // n3treeAdd(test, strClone("a"), (funcCmp_t*) &strCmp);
+    // n3treeAdd(test, strClone("a"), (funcCmp_t*) &strCmp);
+    // n3treeAdd(test, strClone("a"), (funcCmp_t*) &strCmp);
+    // n3treeAdd(test, strClone("b"), (funcCmp_t*) &strCmp);
+    // n3treeAdd(test, strClone("b"), (funcCmp_t*) &strCmp);
+    // n3treeAdd(test, strClone("b"), (funcCmp_t*) &strCmp);
+    // n3treeAdd(test, strClone("A"), (funcCmp_t*) &strCmp);
     // n3treeAdd(test, strClone("2"), (funcCmp_t*) &strCmp);
     // n3treeAdd(test, strClone("0"), (funcCmp_t*) &strCmp);
     // n3treePrint(test, file, (funcPrint_t*) &strPrint);
 
-    n3treeDelete(test, (funcDelete_t*)& strDelete);
+    // n3treeDelete(test, (funcDelete_t*)& strDelete);
+    // fclose(file);
 
-    fclose(file);
+    // list_t* lista = listNew();
+    // examine_list(lista);
+    // listAddFirst(lista, strClone("heyyooooo"));
+    // examine_list(lista);
+    // listAddFirst(lista, strClone("andre 3000"));
+    // examine_list(lista);
+    // listAddFirst(lista, strClone("and the guachi"));
+    // examine_list(lista);
+    // listAddLast(lista, strClone("The Last Jedi"));
+    // examine_list(lista);
+    // listRemoveFirst(lista,(funcDelete_t*)&strDelete );
+    // examine_list(lista);
+    // listRemoveLast(lista,(funcDelete_t*)&strDelete );
+    // examine_list(lista);
 
+    n3tree_t* tree = n3treeNew();
+    n3treeAdd(tree, strClone("a"), (funcCmp_t*) &strCmp);
+    examine_tree(tree->first);
+    n3treeAdd(tree, strClone("b"), (funcCmp_t*) &strCmp);
+    examine_tree(tree->first);
+    // n3treeAdd(tree, strClone("A"), (funcCmp_t*) &strCmp);
+    // n3treeAdd(tree, strClone("A"), (funcCmp_t*) &strCmp);
+    // n3treeAdd(tree, strClone("A"), (funcCmp_t*) &strCmp);
+    // n3treeAdd(tree, strClone("A"), (funcCmp_t*) &strCmp);
+    n3treeAdd(tree, strClone("c"), (funcCmp_t*) &strCmp);
+    examine_tree(tree->first);
+
+    n3treeDelete(tree, (funcDelete_t*)&strDelete );
     return 0;
 }
