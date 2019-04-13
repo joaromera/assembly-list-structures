@@ -233,7 +233,7 @@ strPrint:
 listNew:
     push rbp
     mov rbp, rsp
-    mov rdi, qword LIST_SIZE
+    mov rdi, LIST_SIZE
     call malloc
     mov qword [rax + LIST_FIRST_OFFSET], NULL
     mov qword [rax + LIST_LAST_OFFSET], NULL
@@ -249,7 +249,7 @@ listAddFirst:
     
     push rdi
     push rsi
-    mov rdi, qword ELEM_SIZE
+    mov rdi, ELEM_SIZE
     call malloc
     pop rsi
     pop rdi
@@ -578,6 +578,11 @@ n3treeAdd:
 search:
     push rbp
     mov rbp, rsp
+    push r12
+    push r13
+    push r14
+    sub rsp, 8
+    
     mov rdi, qword [r12 + N3TREE_ELEM_DATA_OFFSET]
     mov rsi, r13
     call r14
@@ -585,47 +590,57 @@ search:
     jl .goLeft
     jg .goRight
     call addElemToList
-    pop rbp
-    ret
+    jmp .end
 
 .goLeft:
     cmp qword [r12 + N3TREE_ELEM_LEFT_OFFSET], NULL
     jne .leftNotNull
     call createNewNodeAndInsert
     mov qword [r12 + N3TREE_ELEM_LEFT_OFFSET], rax
-    pop rbp
-    ret
+    jmp .end
+
 .leftNotNull:
     mov r12, qword [r12 + N3TREE_ELEM_LEFT_OFFSET]
     call search
-    pop rbp
-    ret
+    jmp .end
 
 .goRight:
     cmp qword [r12 + N3TREE_ELEM_RIGHT_OFFSET], NULL
     jne .rightNotNull
     call createNewNodeAndInsert
     mov qword [r12 + N3TREE_ELEM_RIGHT_OFFSET], rax
-    pop rbp
-    ret
+    jmp .end
+
 .rightNotNull:
     mov r12, qword [r12 + N3TREE_ELEM_RIGHT_OFFSET]
     call search
+
+.end:
+    add rsp, 8
+    pop r14
+    pop r13
+    pop r12
     pop rbp
     ret
 
 addElemToList:
     push rbp
     mov rbp, rsp
+    push r12
+    push r13
     mov rdi, qword [r12 + N3TREE_ELEM_CENTER_OFFSET]
     mov rsi, r13
     call listAddFirst
+    pop r13
+    pop r12
     pop rbp
     ret
 
 createNewNodeAndInsert:
     push rbp
     mov rbp, rsp
+    push r13
+    sub rsp, 8
     mov rdi, N3TREE_ELEM_SIZE
     call malloc
     
@@ -640,6 +655,8 @@ createNewNodeAndInsert:
     add rsp, 8
     pop rax
     mov qword [rax + N3TREE_ELEM_CENTER_OFFSET], rdi
+    add rsp, 8
+    pop r13
     pop rbp
     ret
 

@@ -254,13 +254,14 @@ int main (void){
     n3treeAdd(test, strClone("b"), (funcCmp_t*) &strCmp);
     n3treeAdd(test, strClone("b"), (funcCmp_t*) &strCmp);
     n3treeAdd(test, strClone("b"), (funcCmp_t*) &strCmp);
-    n3treeAdd(test, strClone("1"), (funcCmp_t*) &strCmp);
+    n3treeAdd(test, strClone("A"), (funcCmp_t*) &strCmp);
     // n3treeAdd(test, strClone("2"), (funcCmp_t*) &strCmp);
     // n3treeAdd(test, strClone("0"), (funcCmp_t*) &strCmp);
-    n3treePrint(test, file, (funcPrint_t*) &strPrint);
+    // n3treePrint(test, file, (funcPrint_t*) &strPrint);
 
     n3treeDelete(test, (funcDelete_t*)& strDelete);
 
     fclose(file);
+
     return 0;
 }
