@@ -239,10 +239,28 @@ void test_nTable(FILE *pfile){
 }
 
 int main (void){
-    FILE *pfile = fopen("salida.caso.propios.txt","w");
+    // FILE *pfile = fopen("salida.caso.propios.txt","w");
     // test();
-    test_n3tree(pfile);
+    // test_n3tree(pfile);
     // test_nTable(pfile);
-    fclose(pfile);
+    // fclose(pfile);
+    
+    FILE* file = fopen("test","w");
+    
+    n3tree_t* test = n3treeNew();
+    n3treeAdd(test, strClone("a"), (funcCmp_t*) &strCmp);
+    n3treeAdd(test, strClone("a"), (funcCmp_t*) &strCmp);
+    n3treeAdd(test, strClone("a"), (funcCmp_t*) &strCmp);
+    n3treeAdd(test, strClone("b"), (funcCmp_t*) &strCmp);
+    n3treeAdd(test, strClone("b"), (funcCmp_t*) &strCmp);
+    n3treeAdd(test, strClone("b"), (funcCmp_t*) &strCmp);
+    n3treeAdd(test, strClone("1"), (funcCmp_t*) &strCmp);
+    // n3treeAdd(test, strClone("2"), (funcCmp_t*) &strCmp);
+    // n3treeAdd(test, strClone("0"), (funcCmp_t*) &strCmp);
+    n3treePrint(test, file, (funcPrint_t*) &strPrint);
+
+    n3treeDelete(test, (funcDelete_t*)& strDelete);
+
+    fclose(file);
     return 0;
 }

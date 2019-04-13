@@ -130,7 +130,6 @@ strCmp:
 .rdiMaybeShortest:
     cmp byte [rsi + rcx], NULL
     je .end                         ; a = b
-    jmp .rdiSmaller
 
 .rdiSmaller:
     mov rax, 1
@@ -348,6 +347,8 @@ listRemoveFirst:
 
     mov rdi, qword [r14 + ELEM_DATA_OFFSET]
     call r13
+    mov rdi, r14
+    call free
     jmp .end
 
 .listHasOneElement:
@@ -355,6 +356,8 @@ listRemoveFirst:
     mov qword [r12 + LIST_LAST_OFFSET], NULL
     mov rdi, qword [r14 + ELEM_DATA_OFFSET]
     call r13
+    mov rdi, r14
+    call free
 
 .end:
     add rsp, 8
@@ -447,13 +450,14 @@ listDelete:
     mov r14, qword [r12 + LIST_FIRST_OFFSET]
 
 .loop:
-    cmp qword [r14 + ELEM_NEXT_OFFSET], NULL
-    je .end
     mov r15, qword [r14 + ELEM_NEXT_OFFSET]         ;r15 <-- next
     mov rdi, qword [r14 + ELEM_DATA_OFFSET]
     call r13
+    mov rdi, r14
+    call free
+    cmp r15, NULL
+    je .end
     mov r14, r15
-    mov r15, qword [r15 + ELEM_NEXT_OFFSET]
     jmp .loop
 
 .end:
@@ -739,7 +743,10 @@ deleteAllNodes:
     push r13
     push r14
     sub rsp, 8
+
     mov r14, r12
+    mov rdi, qword [r12 + N3TREE_ELEM_DATA_OFFSET]
+    call r13
     cmp qword [r12 + N3TREE_ELEM_CENTER_OFFSET], NULL
     je .noList
     mov rdi, qword [r12 + N3TREE_ELEM_CENTER_OFFSET]
@@ -758,6 +765,7 @@ deleteAllNodes:
 .noRight:
     mov rdi, r14
     call free
+
     add rsp, 8
     pop r14
     pop r13

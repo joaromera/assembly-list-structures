@@ -62,24 +62,24 @@ void listPrintReverse(list_t* l, FILE *pFile, funcPrint_t* fp) {
 
 /** n3tree **/
 
-void n3treePrintAux(n3treeElem_t** t, FILE *pFile, funcPrint_t* fp) {
-    if ((*t)->left == NULL) return;
+void n3treePrintAux(n3treeElem_t* t, FILE *pFile, funcPrint_t* fp) {
+    if (t == NULL) return;
 
     //left
-    n3treePrintAux(&(*t)->left, pFile, fp);
+    n3treePrintAux(t->left, pFile, fp);
     //center
-    fprintf(pFile, (*t)->data);
-    listPrint((*t)->center, pFile, fp);
+    fprintf(pFile, "%s", t->data);
+    listPrint(t->center, pFile, fp);
     fprintf(pFile, ",");
     //right
-    n3treePrintAux(&(*t)->right, pFile, fp);
+    n3treePrintAux(t->right, pFile, fp);
     
 
 }
 
 void n3treePrint(n3tree_t* t, FILE *pFile, funcPrint_t* fp) {
     fprintf(pFile, "<< ");
-    n3treePrintAux((&t->first), pFile, fp);
+    n3treePrintAux(t->first, pFile, fp);
     fprintf(pFile, " >>");
 }
 
