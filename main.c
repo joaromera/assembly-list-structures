@@ -25,7 +25,7 @@ void test(){
     len = strLen(test);
     assert(len == 4);
 
-    // Testing strClone & strDelete
+    // // Testing strClone & strDelete
     test = "";
     char* clone = strClone(test);
     assert(strcmp(test, clone) == 0);
@@ -46,26 +46,50 @@ void test(){
     assert(strcmp(test, clone4) == 0);
     strDelete(clone4);
 
-    // Testing strCmp
+    // // Testing strCmp
     test = "";
     char* cmp = "";
-    assert(strCmp(strClone(test), strClone(cmp)) == 0);
+    char* tsc = strClone(test);
+    char* tsc2 = strClone(cmp);
+    assert(strCmp(tsc, tsc2) == 0);
+    strDelete(tsc);
+    strDelete(tsc2);
 
     test = "hola, mundo!";
     cmp = "hola, mundo!";
-    assert(strCmp(strClone(test), strClone(cmp)) == 0);
+    
+    char* tsc3 = strClone(test);
+    char* tsc4 = strClone(cmp);
+    assert(strCmp(tsc3, tsc4) == 0);
+    strDelete(tsc3);
+    strDelete(tsc4);
 
     test = "1";
     cmp = "2";
-    assert(strCmp(strClone(test), strClone(cmp)) == 1);
-    assert(strCmp(strClone(cmp), strClone(test)) == -1);
+    char* tsc5 = strClone(test);
+    char* tsc6 = strClone(cmp);
+    assert(strCmp(tsc5,tsc6) == 1);
+    assert(strCmp(tsc6,tsc5) == -1);    
+    strDelete(tsc5);
+    strDelete(tsc6);
 
-    assert(strCmp(strClone("0"), strClone("0")) == 0);
+    test = "0";
+    cmp = "0";
+    char* tsc7 = strClone(test);
+    char* tsc8 = strClone(cmp);
+    assert(strCmp(tsc7,tsc8) == 0);
+    assert(strCmp(tsc8,tsc7) == 0);    
+    strDelete(tsc7);
+    strDelete(tsc8);
 
     test = "19";
     cmp = "138";
-    assert(strCmp(test, cmp) == -1);
-    assert(strCmp(cmp, test) == 1);
+    char* tsc9 = strClone(test);
+    char* tsc10 = strClone(cmp);
+    assert(strCmp(tsc9,tsc10) == -1);
+    assert(strCmp(tsc10,tsc9) == 1);    
+    strDelete(tsc9);
+    strDelete(tsc10);
 
     test = "hola ";
     cmp = "mundo!";
@@ -95,18 +119,20 @@ void test(){
     printf("%s\n",cc3);
     strDelete(cc3);
 
-    // Testing strPrint
+    // // Testing strPrint
     FILE* pFile = fopen("file", "a");
-    strPrint(strClone(empty_str),pFile);
+    char* empty_str_cloned = strClone(empty_str);
+    strPrint(empty_str_cloned,pFile);
+    strDelete(empty_str_cloned);
     fprintf(pFile, "\n");
 
-    // Testing listNew
+    // // Testing listNew
     list_t* list_test = listNew();
     listPrint(list_test, pFile, NULL);
     listPrint(list_test, pFile, (funcPrint_t*)& strPrint);
     fprintf(pFile, "\n");
     
-    // Testing add first with list print and strprint
+    // // Testing add first with list print and strprint
     listAddFirst(list_test, strClone(non_empty_str));
     listPrint(list_test, pFile, NULL);
     listPrint(list_test, pFile, (funcPrint_t*)& strPrint);
@@ -122,7 +148,7 @@ void test(){
     listPrint(list_test, pFile, (funcPrint_t*)& strPrint);
     fprintf(pFile, "\n");
 
-    // Testing list delete
+    // // Testing list delete
     listRemoveLast(list_test, (funcDelete_t*)& strDelete);
     listPrint(list_test, pFile, NULL);
     listPrint(list_test, pFile, (funcPrint_t*)& strPrint);
@@ -138,7 +164,7 @@ void test(){
     listPrint(list_test, pFile, (funcPrint_t*)& strPrint);
     fprintf(pFile, "\n");
 
-    // Testing add last
+    // // Testing add last
     listAddLast(list_test, strClone(non_empty_str));
     listPrint(list_test, pFile, NULL);
     listPrint(list_test, pFile, (funcPrint_t*)& strPrint);
@@ -157,7 +183,7 @@ void test(){
     fclose(pr);
     fprintf(pFile, "\n");
 
-    // // Testing list delete
+    // // // Testing list delete
     listRemoveFirst(list_test, (funcDelete_t*)& strDelete);
     listPrint(list_test, pFile, NULL);
     listPrint(list_test, pFile, (funcPrint_t*)& strPrint);
@@ -176,27 +202,28 @@ void test(){
 
     fclose(pFile);
 
-    // Testing N3TREE new
+    // // Testing N3TREE new
     n3tree_t* n3tree_test = n3treeNew();
     n3treeAdd(n3tree_test, strClone("1"),(funcCmp_t*)&strCmp);
 
-    // Test Remove Eq
-    n3treeRemoveEq(n3tree_test,(funcDelete_t*)&strDelete);
-    n3treeAdd(n3tree_test, strClone("4"),(funcCmp_t*)&strCmp);
-    n3treeAdd(n3tree_test, strClone("8"),(funcCmp_t*)&strCmp);
-    n3treeAdd(n3tree_test, strClone("2"),(funcCmp_t*)&strCmp);
-    n3treeAdd(n3tree_test, strClone("0"),(funcCmp_t*)&strCmp);
-    n3treeAdd(n3tree_test, strClone("3"),(funcCmp_t*)&strCmp);
-    n3treeAdd(n3tree_test, strClone("3"),(funcCmp_t*)&strCmp);
-    n3treeAdd(n3tree_test, strClone("3"),(funcCmp_t*)&strCmp);
-    n3treeAdd(n3tree_test, strClone("3"),(funcCmp_t*)&strCmp);
-    n3treeAdd(n3tree_test, strClone("3"),(funcCmp_t*)&strCmp);
-    n3treeAdd(n3tree_test, strClone("9"),(funcCmp_t*)&strCmp);
+    // // Test Remove Eq
+    // n3treeRemoveEq(n3tree_test,(funcDelete_t*)&strDelete);
+    // n3treeAdd(n3tree_test, strClone("4"),(funcCmp_t*)&strCmp);
+    // n3treeAdd(n3tree_test, strClone("8"),(funcCmp_t*)&strCmp);
+    // n3treeAdd(n3tree_test, strClone("2"),(funcCmp_t*)&strCmp);
+    // n3treeAdd(n3tree_test, strClone("0"),(funcCmp_t*)&strCmp);
+    // n3treeAdd(n3tree_test, strClone("3"),(funcCmp_t*)&strCmp);
+    // n3treeAdd(n3tree_test, strClone("3"),(funcCmp_t*)&strCmp);
+    // n3treeAdd(n3tree_test, strClone("3"),(funcCmp_t*)&strCmp);
+    // n3treeAdd(n3tree_test, strClone("3"),(funcCmp_t*)&strCmp);
+    // n3treeAdd(n3tree_test, strClone("3"),(funcCmp_t*)&strCmp);
+    // n3treeAdd(n3tree_test, strClone("9"),(funcCmp_t*)&strCmp);
 
     FILE* ntpt = fopen("n3treeprint","w");
     n3treePrint(n3tree_test, ntpt, (funcPrint_t*)& strPrint);
     fclose(ntpt);
-    // Test delete
+
+    // // Test delete
     n3treeDelete(n3tree_test,(funcDelete_t*)&strDelete);
 
     n3tree_t* n3tree_test2 = n3treeNew();
@@ -204,9 +231,10 @@ void test(){
     n3treeAdd(n3tree_test2, strClone("1"),(funcCmp_t*)&strCmp);
     n3treeDelete(n3tree_test2,(funcDelete_t*)&strDelete);
 
-    // NTABLE
+    // // NTABLE
     nTable_t *n = nTableNew(32);
     char* strings[10] = {"aa","bb","dd","ff","00","zz","cc","ee","gg","hh"};
+    // nTableAdd(n, 0, strClone(strings[0]), (funcCmp_t*)&strCmp);
     for(int s=0;s<32;s++)
     {
         for(int i=0;i<10;i++)
@@ -214,8 +242,8 @@ void test(){
             nTableAdd(n, s, strClone(strings[i]), (funcCmp_t*)&strCmp);
         }
     }
-    // nTableRemoveSlot(n, 1, strClone(strings[0]), (funcCmp_t*)&strCmp, (funcDelete_t*)&strDelete);
-    // nTableDelete(n, (funcDelete_t*)&strDelete);
+    nTableRemoveSlot(n, 1, strClone(strings[0]), (funcCmp_t*)&strCmp, (funcDelete_t*)&strDelete);
+    nTableDelete(n, (funcDelete_t*)&strDelete);
 }
 
 void test_n3tree(FILE *pfile){
@@ -288,7 +316,7 @@ void examine_str(char* str)
 
 int main (void){
     // FILE *pfile = fopen("salida.caso.propios.txt","w");
-    // test();
+    test();
     // test_n3tree(pfile);
     // test_nTable(pfile);
     // fclose(pfile);
@@ -325,18 +353,18 @@ int main (void){
     // listRemoveLast(lista,(funcDelete_t*)&strDelete );
     // examine_list(lista);
 
-    n3tree_t* tree = n3treeNew();
-    n3treeAdd(tree, strClone("a"), (funcCmp_t*) &strCmp);
-    examine_tree(tree->first);
-    n3treeAdd(tree, strClone("b"), (funcCmp_t*) &strCmp);
-    examine_tree(tree->first);
+    // n3tree_t* tree = n3treeNew();
+    // n3treeAdd(tree, strClone("a"), (funcCmp_t*) &strCmp);
+    // examine_tree(tree->first);
+    // n3treeAdd(tree, strClone("b"), (funcCmp_t*) &strCmp);
+    // examine_tree(tree->first);
     // n3treeAdd(tree, strClone("A"), (funcCmp_t*) &strCmp);
     // n3treeAdd(tree, strClone("A"), (funcCmp_t*) &strCmp);
     // n3treeAdd(tree, strClone("A"), (funcCmp_t*) &strCmp);
     // n3treeAdd(tree, strClone("A"), (funcCmp_t*) &strCmp);
-    n3treeAdd(tree, strClone("c"), (funcCmp_t*) &strCmp);
-    examine_tree(tree->first);
+    // n3treeAdd(tree, strClone("c"), (funcCmp_t*) &strCmp);
+    // examine_tree(tree->first);
 
-    n3treeDelete(tree, (funcDelete_t*)&strDelete );
+    // n3treeDelete(tree, (funcDelete_t*)&strDelete );
     return 0;
 }

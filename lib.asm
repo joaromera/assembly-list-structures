@@ -319,7 +319,30 @@ listAddLast:
 listAdd:
     ret
 
+; Borra todos los nodos de la lista cuyo dato sea igual al contenido de data
+; segu ́n la funci ́on de comparaci ́on apuntada por fc. 
+; Si fd no es cero, utiliza la funci ́on para borrar los datos en cuesti ́on.
 listRemove:
+    ;rdi list_t* l
+    ;rsi void* data
+    ;rdx funcCmp_t* fc
+    ;rcx funcDelete_t* fd
+    push rbp
+    mov rbp, rsp
+    push r12
+    push r13
+    push r14
+    push r15
+    mov r12, rdi
+    mov r13, rsi
+    mov r14, rdx
+    mov r15, rcx
+
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop rbp
     ret
 
 listRemoveFirst:
@@ -809,11 +832,16 @@ nTableNew:
     mov qword [rax + NTABLE_SIZE_OFFSET], r12
     mov r13, rax                                    ; r13 *ntable
 
+    ; r12 size
+    ; r13 *ntable
     shl r12, 3
     mov rdi, r12
     call malloc
     mov r14, rax                                    ; r14 *listarray
 
+    ; r12 size * 8
+    ; r13 *ntable
+    ; r14 list* array
     xor r15, r15
 .loop:
     cmp r15, r12
@@ -824,10 +852,7 @@ nTableNew:
     jmp .loop
 
 .end:
-    mov rdi, POINTER_SIZE
-    call malloc
-    mov qword [rax], r14
-    mov qword [r13 + NTABLE_LIST_OFFSET], rax
+    mov qword [r13 + NTABLE_LIST_OFFSET], r14
     mov rax, r13
 
     pop r15
@@ -844,13 +869,12 @@ nTableAdd:
     sub rsp, 8
     mov r12, qword [rdi + NTABLE_LIST_OFFSET]
     shl rsi, 3
-    add r12, rsi
     ;(nTable_t* t, uint32_t slot, void* data, funcCmp_t* fc)
     ;listAdd(list_t* l, void* data, funcCmp_t* fc)
     mov rdi, qword [r12 + rsi]
     mov rsi, rdx
     mov rdx, rcx
-    call listAdd
+    call listAddFirst
     add rsp, 8
     pop r12
     pop rbp
@@ -904,27 +928,35 @@ nTableDelete:
     ; rsi <-- funcDelete_t* fd
     push rbp
     mov rbp, rsp
+    push r8
     push r12
     push r13
+    push r14
+    push r15
+    sub rsp, 8
+    mov r8, rsi
     mov r12, qword [rdi + NTABLE_LIST_OFFSET]
     mov r13, qword [rdi + NTABLE_SIZE_OFFSET]
     xor r14, r14
+    mov r15, rdi
 .loop:
     cmp r14, r13
     je .end
-
     ;listDelete(list_t* l, funcDelete_t* fd)
-    mov rdi, qword [r12]
-    mov rsi, rdx
+    mov rdi, qword [r12 + r14 * 8]
+    mov rsi, r8
     call listDelete
-    mov rdi, LIST_SIZE
-    call listNew
-    mov qword [r12], rax
-
-    add qword r12, POINTER_SIZE
     inc r14
     jmp .loop
 .end:
+    mov rdi, r12
+    call free
+    mov rdi, r15
+    call free
+    add rsp, 8
+    pop r8
+    pop r15
+    pop r14
     pop r13
     pop r12
     pop rbp
