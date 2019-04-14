@@ -162,6 +162,7 @@ strConcat:
     call malloc
     mov r14, rax
 
+    xor r10, r10
     xor rdx, rdx
 .concatFirst:
     cmp byte [r12 + rdx], NULL
@@ -186,13 +187,16 @@ strConcat:
 .end:
     mov byte [r14 + rdx], NULL
 
-    mov rdi, r12
-    call strDelete
+    cmp r13, r12
+    je .aliasing
     mov rdi, r13
     call strDelete
+.aliasing:
+    mov rdi, r12
+    call strDelete
+
 
     mov rax, r14
-
     add rsp, 8
     pop r14
     pop r13
@@ -315,8 +319,68 @@ listAddLast:
     pop rbp
     ret
 
-
+; void listAdd(list_t* l, void* data, funcCmp_t* fc)
+; Agrega un nuevo nodo que almacene data, respetando el orden dado por la funci ́on f.
 listAdd:
+    ; rdi list_t * l
+    ; rsi void* data
+    ; rdx funcCmp_t *
+    push rbp
+    mov rbp, rsp
+    push r8
+    push r12
+    push r13
+    push r14
+    push r15
+    sub rsp, 8
+    xor r8, r8
+    mov r12, rdi
+    mov r13, qword [rdi + LIST_FIRST_OFFSET]
+    mov r14, rsi
+    mov r15, rdx
+
+    cmp r13, NULL
+    mov rdi, r12
+    call listAddFirst
+    jmp .end
+
+.loop:
+    mov rdi, r14
+    mov rsi, qword [r13 + ELEM_DATA_OFFSET]
+    call r15
+    cmp rax, 1
+    je .addHere
+    mov r13, qword [r13 + ELEM_NEXT_OFFSET]
+    cmp r13, NULL
+    je .addLast
+    jmp .loop
+
+.addHere:
+    mov rdi, ELEM_SIZE
+    call malloc
+    mov qword [rax + ELEM_DATA_OFFSET], r14
+    mov rdi, qword [r13 + ELEM_PREV_OFFSET]
+    mov qword [rax + ELEM_PREV_OFFSET], rdi
+    mov qword [rax + ELEM_NEXT_OFFSET], r13
+    mov qword [r13 + ELEM_PREV_OFFSET], rax
+    cmp rdi, NULL
+    jne .end
+    mov qword [r12 + LIST_LAST_OFFSET], rax
+    jmp .end
+
+.addLast:
+    mov rdi, r12
+    mov rsi, r14
+    call listAddLast
+
+.end:
+    add rsp, 8
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop r8
+    pop rbp
     ret
 
 ; Borra todos los nodos de la lista cuyo dato sea igual al contenido de data
@@ -329,6 +393,8 @@ listRemove:
     ;rcx funcDelete_t* fd
     push rbp
     mov rbp, rsp
+    push rbx
+    push r8
     push r12
     push r13
     push r14
@@ -338,10 +404,55 @@ listRemove:
     mov r14, rdx
     mov r15, rcx
 
+    cmp qword [r12 + LIST_FIRST_OFFSET], NULL
+    je .end
+
+    cmp r15, NULL
+    jne .useFuncDelete
+    mov r15, free
+.useFuncDelete:
+
+    mov rbx, qword [r12 + LIST_FIRST_OFFSET]
+.loop:
+    cmp rbx, NULL
+    je .end
+    mov rdi, qword [rbx + ELEM_DATA_OFFSET]
+    call r14
+    cmp rax, NULL
+    je .delete
+    mov rbx, qword [rbx + ELEM_NEXT_OFFSET]
+    jmp .loop
+
+.delete:
+    mov rdi, qword [rbx + ELEM_DATA_OFFSET]
+    call r15
+    mov rdx, qword [rbx + ELEM_PREV_OFFSET]
+    mov rcx, qword [rbx + ELEM_NEXT_OFFSET]
+    cmp rdx, NULL
+    jne .prevNotNull
+    mov qword [r12 + LIST_FIRST_OFFSET], rcx
+    mov qword [rcx + ELEM_PREV_OFFSET], NULL
+    jmp .freeNode
+.prevNotNull:
+    mov qword [rdx + ELEM_NEXT_OFFSET], rcx
+    mov qword [rcx + ELEM_PREV_OFFSET], rdx
+.freeNode:
+    mov rdi, rbx
+    mov rbx, qword [rbx + ELEM_NEXT_OFFSET]
+    cmp rbx, NULL
+    jne .freeAndLoop
+    mov qword [r12 + LIST_LAST_OFFSET], rdi
+.freeAndLoop:
+    call free
+    jmp .loop
+
+.end:
     pop r15
     pop r14
     pop r13
     pop r12
+    pop r8
+    pop rbx
     pop rbp
     ret
 
