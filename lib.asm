@@ -343,7 +343,7 @@ listAdd:
     mov rdi, r14
     mov rsi, qword [r13 + ELEM_DATA_OFFSET]
     call r15
-    cmp rax, 1
+    cmp rax, -1
     jne .addHere
     mov r13, qword [r13 + ELEM_NEXT_OFFSET]
     cmp r13, NULL
@@ -353,20 +353,28 @@ listAdd:
 .addHere:
     mov rdi, ELEM_SIZE
     call malloc
-    mov qword [rax + ELEM_DATA_OFFSET], r14
     mov rdi, qword [r13 + ELEM_PREV_OFFSET]
+    ; r13 <-- next
+    ; rdi <-- prev
+    
+    mov qword [rax + ELEM_DATA_OFFSET], r14
     mov qword [rax + ELEM_PREV_OFFSET], rdi
     mov qword [rax + ELEM_NEXT_OFFSET], r13
+
     mov qword [r13 + ELEM_PREV_OFFSET], rax
     cmp rdi, NULL
-    jne .end
-    mov qword [r12 + LIST_FIRST_OFFSET], rax
+    je .newFirst
+    mov qword [rdi + ELEM_NEXT_OFFSET], rax
     jmp .end
 
 .addLast:
     mov rdi, r12
     mov rsi, r14
     call listAddLast
+    jmp .end
+
+.newFirst:
+    mov qword [r12 + LIST_FIRST_OFFSET], rax
 
 .end:
     add rsp, 8

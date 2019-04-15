@@ -229,20 +229,14 @@ void test(){
     // // NTABLE
     nTable_t *n = nTableNew(32);
     char* strings[10] = {"aa","bb","dd","ff","00","zz","cc","ee","gg","hh"};
-    jodita();
-    nTableAdd(n, 0, strClone(strings[0]), (funcCmp_t*)&strCmp);
-    nTableAdd(n, 1, strClone(strings[0]), (funcCmp_t*)&strCmp);
-    nTableAdd(n, 1, strClone(strings[1]), (funcCmp_t*)&strCmp);
-    // examine_ntable(n, 32);
-    nTableAdd(n, 10, strClone(strings[4]), (funcCmp_t*)&strCmp);
-    nTableAdd(n, 31, strClone(strings[4]), (funcCmp_t*)&strCmp);
-    // for(int s=0;s<32;s++)
-    // {
-    //     for(int i=0;i<10;i++)
-    //     {
-    //         nTableAdd(n, s, strClone(strings[i]), (funcCmp_t*)&strCmp);
-    //     }
-    // }
+    for(int s=0;s<32;s++)
+    {
+        for(int i=0;i<10;i++)
+        {
+            nTableAdd(n, 0, strClone(strings[i]), (funcCmp_t*)&strCmp);
+        }
+    }
+    examine_ntable(n, 32);
     // nTableRemoveSlot(n, 1, strClone(strings[0]), (funcCmp_t*)&strCmp, (funcDelete_t*)&strDelete);
     nTableDelete(n, (funcDelete_t*)&strDelete);
 }
