@@ -715,6 +715,9 @@ n3treeAdd:
     ret
 
 search:
+    ; r12 <-- *elem
+    ; r13 <-- void* data
+    ; r14 <-- funcCmp_t* fc
     push rbp
     mov rbp, rsp
     push r12
@@ -893,6 +896,8 @@ n3treeDelete:
 
 
 deleteAllNodes:
+    ; r12 <-- *elemt 
+    ; r13 <-- funcDelete_t* fd
     push rbp
     mov rbp, rsp
     push r12
@@ -913,11 +918,13 @@ deleteAllNodes:
     je .noLeft
     mov r12, qword [r12 + N3TREE_ELEM_LEFT_OFFSET]
     call deleteAllNodes
+    mov r12, r14
 .noLeft:
     cmp qword [r12 + N3TREE_ELEM_RIGHT_OFFSET], NULL
     je .noRight
     mov r12, qword [r12 + N3TREE_ELEM_RIGHT_OFFSET]
     call deleteAllNodes
+    mov r12, r14
 .noRight:
     mov rdi, r14
     call free

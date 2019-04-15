@@ -178,9 +178,6 @@ void test(){
     listAddLast(list_test, strClone(non_empty_str));
     listPrint(list_test, pFile, NULL);
     listPrint(list_test, pFile, (funcPrint_t*)& strPrint);
-    FILE *pr = fopen("printRev","w");
-    listPrintReverse(list_test, pr, (funcPrint_t*)& strPrint);
-    fclose(pr);
     fprintf(pFile, "\n");
 
     // // // Testing list delete
@@ -205,24 +202,21 @@ void test(){
     // // Testing N3TREE new
     n3tree_t* n3tree_test = n3treeNew();
     n3treeAdd(n3tree_test, strClone("1"),(funcCmp_t*)&strCmp);
-
+    printf("tree is in %p and points to %p\n", n3tree_test, n3tree_test->first);
+examine_tree(n3tree_test->first);
     // // Test Remove Eq
-    // n3treeRemoveEq(n3tree_test,(funcDelete_t*)&strDelete);
-    // n3treeAdd(n3tree_test, strClone("4"),(funcCmp_t*)&strCmp);
-    // n3treeAdd(n3tree_test, strClone("8"),(funcCmp_t*)&strCmp);
-    // n3treeAdd(n3tree_test, strClone("2"),(funcCmp_t*)&strCmp);
-    // n3treeAdd(n3tree_test, strClone("0"),(funcCmp_t*)&strCmp);
-    // n3treeAdd(n3tree_test, strClone("3"),(funcCmp_t*)&strCmp);
-    // n3treeAdd(n3tree_test, strClone("3"),(funcCmp_t*)&strCmp);
-    // n3treeAdd(n3tree_test, strClone("3"),(funcCmp_t*)&strCmp);
-    // n3treeAdd(n3tree_test, strClone("3"),(funcCmp_t*)&strCmp);
-    // n3treeAdd(n3tree_test, strClone("3"),(funcCmp_t*)&strCmp);
-    // n3treeAdd(n3tree_test, strClone("9"),(funcCmp_t*)&strCmp);
-
-    FILE* ntpt = fopen("n3treeprint","w");
-    n3treePrint(n3tree_test, ntpt, (funcPrint_t*)& strPrint);
-    fclose(ntpt);
-
+    n3treeAdd(n3tree_test, strClone("2"),(funcCmp_t*)&strCmp);
+    n3treeAdd(n3tree_test, strClone("4"),(funcCmp_t*)&strCmp);
+    n3treeAdd(n3tree_test, strClone("8"),(funcCmp_t*)&strCmp);
+    n3treeAdd(n3tree_test, strClone("0"),(funcCmp_t*)&strCmp);
+    n3treeAdd(n3tree_test, strClone("3"),(funcCmp_t*)&strCmp);
+    n3treeAdd(n3tree_test, strClone("3"),(funcCmp_t*)&strCmp);
+    n3treeAdd(n3tree_test, strClone("3"),(funcCmp_t*)&strCmp);
+    n3treeAdd(n3tree_test, strClone("3"),(funcCmp_t*)&strCmp);
+    n3treeAdd(n3tree_test, strClone("3"),(funcCmp_t*)&strCmp);
+    n3treeAdd(n3tree_test, strClone("9"),(funcCmp_t*)&strCmp);
+    printf("tree is in %p and points to %p\n", n3tree_test, n3tree_test->first);
+    examine_tree(n3tree_test->first);
     // // Test delete
     n3treeDelete(n3tree_test,(funcDelete_t*)&strDelete);
 
@@ -232,18 +226,18 @@ void test(){
     n3treeDelete(n3tree_test2,(funcDelete_t*)&strDelete);
 
     // // NTABLE
-    nTable_t *n = nTableNew(32);
-    char* strings[10] = {"aa","bb","dd","ff","00","zz","cc","ee","gg","hh"};
-    // nTableAdd(n, 0, strClone(strings[0]), (funcCmp_t*)&strCmp);
-    for(int s=0;s<32;s++)
-    {
-        for(int i=0;i<10;i++)
-        {
-            nTableAdd(n, s, strClone(strings[i]), (funcCmp_t*)&strCmp);
-        }
-    }
-    nTableRemoveSlot(n, 1, strClone(strings[0]), (funcCmp_t*)&strCmp, (funcDelete_t*)&strDelete);
-    nTableDelete(n, (funcDelete_t*)&strDelete);
+    // nTable_t *n = nTableNew(32);
+    // char* strings[10] = {"aa","bb","dd","ff","00","zz","cc","ee","gg","hh"};
+    // // nTableAdd(n, 0, strClone(strings[0]), (funcCmp_t*)&strCmp);
+    // for(int s=0;s<32;s++)
+    // {
+    //     for(int i=0;i<10;i++)
+    //     {
+    //         nTableAdd(n, s, strClone(strings[i]), (funcCmp_t*)&strCmp);
+    //     }
+    // }
+    // nTableRemoveSlot(n, 1, strClone(strings[0]), (funcCmp_t*)&strCmp, (funcDelete_t*)&strDelete);
+    // nTableDelete(n, (funcDelete_t*)&strDelete);
 }
 
 void test_n3tree(FILE *pfile){
