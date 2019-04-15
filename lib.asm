@@ -261,12 +261,6 @@ listAddFirst:
     mov qword [rax + ELEM_DATA_OFFSET], rsi
     mov qword [rax + ELEM_NEXT_OFFSET], NULL
     mov qword [rax + ELEM_PREV_OFFSET], NULL
-    ; OK!!!!!
-
-    ; rdi la lista
-
-
-
     cmp qword [rdi + LIST_FIRST_OFFSET], NULL
     jne .notFirstToAdd
 
@@ -340,6 +334,7 @@ listAdd:
     mov r15, rdx
 
     cmp r13, NULL
+    jne .loop
     mov rdi, r12
     call listAddFirst
     jmp .end
@@ -349,7 +344,7 @@ listAdd:
     mov rsi, qword [r13 + ELEM_DATA_OFFSET]
     call r15
     cmp rax, 1
-    je .addHere
+    jne .addHere
     mov r13, qword [r13 + ELEM_NEXT_OFFSET]
     cmp r13, NULL
     je .addLast
@@ -365,7 +360,7 @@ listAdd:
     mov qword [r13 + ELEM_PREV_OFFSET], rax
     cmp rdi, NULL
     jne .end
-    mov qword [r12 + LIST_LAST_OFFSET], rax
+    mov qword [r12 + LIST_FIRST_OFFSET], rax
     jmp .end
 
 .addLast:
@@ -989,6 +984,7 @@ nTableAdd:
     mov rbp, rsp
     push r12
     sub rsp, 8
+
     mov r12, qword [rdi + NTABLE_LIST_OFFSET]
     shl rsi, 3
     ;(nTable_t* t, uint32_t slot, void* data, funcCmp_t* fc)
@@ -997,6 +993,7 @@ nTableAdd:
     mov rsi, rdx
     mov rdx, rcx
     call listAdd
+    
     add rsp, 8
     pop r12
     pop rbp
@@ -1012,6 +1009,7 @@ nTableRemoveSlot:
     ; r8  <-- funcDelete_t* fd
     push rbp
     mov rbp, rsp
+
     mov rax, qword [rdi + NTABLE_LIST_OFFSET]
     shl rsi, 3
     add rax, rsi
@@ -1021,6 +1019,7 @@ nTableRemoveSlot:
     mov rdx, rcx
     mov rcx, r8
     call listRemove
+    
     pop rbp
     ret
     
@@ -1029,6 +1028,7 @@ nTableDeleteSlot:       ;(nTable_t* t, uint32_t slot, funcDelete_t* fd)
     mov rbp, rsp
     push r12
     sub rsp, 8
+
     mov r12, qword [rdi + NTABLE_LIST_OFFSET]
     shl rsi, 3
     add r12, rsi
@@ -1039,6 +1039,7 @@ nTableDeleteSlot:       ;(nTable_t* t, uint32_t slot, funcDelete_t* fd)
     mov rdi, LIST_SIZE
     call listNew
     mov qword [r12], rax
+    
     add rsp, 8
     pop r12
     pop rbp
@@ -1056,6 +1057,7 @@ nTableDelete:
     push r14
     push r15
     sub rsp, 8
+
     mov r8, rsi
     mov r12, qword [rdi + NTABLE_LIST_OFFSET]
     mov r13, qword [rdi + NTABLE_SIZE_OFFSET]
@@ -1078,6 +1080,7 @@ nTableDelete:
     call free
     mov rdi, r15
     call free
+
     add rsp, 8
     pop r8
     pop r15

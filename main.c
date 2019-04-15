@@ -229,10 +229,13 @@ void test(){
     // // NTABLE
     nTable_t *n = nTableNew(32);
     char* strings[10] = {"aa","bb","dd","ff","00","zz","cc","ee","gg","hh"};
+    jodita();
     nTableAdd(n, 0, strClone(strings[0]), (funcCmp_t*)&strCmp);
-    nTableAdd(n, 5, strClone(strings[1]), (funcCmp_t*)&strCmp);
-    examine_ntable(n, 32);
-    // nTableAdd(n, 0, strClone(strings[4]), (funcCmp_t*)&strCmp);
+    nTableAdd(n, 1, strClone(strings[0]), (funcCmp_t*)&strCmp);
+    nTableAdd(n, 1, strClone(strings[1]), (funcCmp_t*)&strCmp);
+    // examine_ntable(n, 32);
+    nTableAdd(n, 10, strClone(strings[4]), (funcCmp_t*)&strCmp);
+    nTableAdd(n, 31, strClone(strings[4]), (funcCmp_t*)&strCmp);
     // for(int s=0;s<32;s++)
     // {
     //     for(int i=0;i<10;i++)
@@ -243,7 +246,7 @@ void test(){
     // nTableRemoveSlot(n, 1, strClone(strings[0]), (funcCmp_t*)&strCmp, (funcDelete_t*)&strDelete);
     nTableDelete(n, (funcDelete_t*)&strDelete);
 }
-
+void jodita() {};
 void test_n3tree(FILE *pfile){
     n3tree_t* n3t = n3treeNew();
     char* strings[10] = {"1","2","3","1","2","3","1","2","3"};
@@ -290,7 +293,8 @@ void examine_tree(n3treeElem_t* elem)
 }
 
 void print_tri(n3treeElem_t* elem)
-{
+{   
+    if (elem == NULL) return;
     printf("\tData at %p\t has: %p\t is: %s\n", &elem->data, elem->data, elem->data);
     printf("\tLeft at %p\t has: %p\n", &elem->left, elem->left);
     printf("\tCenter at %p\t has: %p\n", &elem->center, elem->center);
