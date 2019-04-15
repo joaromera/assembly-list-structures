@@ -431,25 +431,38 @@ listRemove:
     call r15
     mov rdx, qword [rbx + ELEM_PREV_OFFSET]
     mov rcx, qword [rbx + ELEM_NEXT_OFFSET]
+    ; rdx <<< prev
+    ; rcx <<< next
     cmp rdx, NULL
     jne .prevNotNull
     mov qword [r12 + LIST_FIRST_OFFSET], rcx
-    mov qword [rcx + ELEM_PREV_OFFSET], NULL
-    jmp .freeNode
+    jmp .continue
+
 .prevNotNull:
     mov qword [rdx + ELEM_NEXT_OFFSET], rcx
+.continue:
+    cmp rcx, NULL
+    jne .nextNotNull
+    mov qword [r12 + LIST_LAST_OFFSET], NULL
+    jmp .freeNode
+
+.nextNotNull:
     mov qword [rcx + ELEM_PREV_OFFSET], rdx
+
 .freeNode:
     mov rdi, rbx
     mov rbx, qword [rbx + ELEM_NEXT_OFFSET]
     cmp rbx, NULL
     jne .freeAndLoop
     mov qword [r12 + LIST_LAST_OFFSET], rdi
+
 .freeAndLoop:
     call free
     jmp .loop
 
 .end:
+    mov rdi, r13
+    call r15
     pop r15
     pop r14
     pop r13
@@ -1017,7 +1030,7 @@ nTableRemoveSlot:
     ; r8  <-- funcDelete_t* fd
     push rbp
     mov rbp, rsp
-
+    
     mov rax, qword [rdi + NTABLE_LIST_OFFSET]
     shl rsi, 3
     add rax, rsi

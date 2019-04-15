@@ -23,11 +23,11 @@ void test_3();
 int main() {
     srand(12345);
     remove(filename_1);
-    test_1();
+    // test_1();
     remove(filename_2);
     test_2();
     remove(filename_3);
-    test_3();  
+    // test_3();  
     return 0;
 }
 
