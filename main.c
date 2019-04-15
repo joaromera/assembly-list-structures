@@ -203,7 +203,7 @@ void test(){
     n3tree_t* n3tree_test = n3treeNew();
     n3treeAdd(n3tree_test, strClone("1"),(funcCmp_t*)&strCmp);
     printf("tree is in %p and points to %p\n", n3tree_test, n3tree_test->first);
-examine_tree(n3tree_test->first);
+
     // // Test Remove Eq
     n3treeAdd(n3tree_test, strClone("2"),(funcCmp_t*)&strCmp);
     n3treeAdd(n3tree_test, strClone("4"),(funcCmp_t*)&strCmp);
@@ -216,7 +216,8 @@ examine_tree(n3tree_test->first);
     n3treeAdd(n3tree_test, strClone("3"),(funcCmp_t*)&strCmp);
     n3treeAdd(n3tree_test, strClone("9"),(funcCmp_t*)&strCmp);
     printf("tree is in %p and points to %p\n", n3tree_test, n3tree_test->first);
-    examine_tree(n3tree_test->first);
+    // examine_tree(n3tree_test->first);
+
     // // Test delete
     n3treeDelete(n3tree_test,(funcDelete_t*)&strDelete);
 
@@ -226,9 +227,12 @@ examine_tree(n3tree_test->first);
     n3treeDelete(n3tree_test2,(funcDelete_t*)&strDelete);
 
     // // NTABLE
-    // nTable_t *n = nTableNew(32);
-    // char* strings[10] = {"aa","bb","dd","ff","00","zz","cc","ee","gg","hh"};
-    // // nTableAdd(n, 0, strClone(strings[0]), (funcCmp_t*)&strCmp);
+    nTable_t *n = nTableNew(32);
+    char* strings[10] = {"aa","bb","dd","ff","00","zz","cc","ee","gg","hh"};
+    nTableAdd(n, 0, strClone(strings[0]), (funcCmp_t*)&strCmp);
+    nTableAdd(n, 5, strClone(strings[1]), (funcCmp_t*)&strCmp);
+    examine_ntable(n, 32);
+    // nTableAdd(n, 0, strClone(strings[4]), (funcCmp_t*)&strCmp);
     // for(int s=0;s<32;s++)
     // {
     //     for(int i=0;i<10;i++)
@@ -237,7 +241,7 @@ examine_tree(n3tree_test->first);
     //     }
     // }
     // nTableRemoveSlot(n, 1, strClone(strings[0]), (funcCmp_t*)&strCmp, (funcDelete_t*)&strDelete);
-    // nTableDelete(n, (funcDelete_t*)&strDelete);
+    nTableDelete(n, (funcDelete_t*)&strDelete);
 }
 
 void test_n3tree(FILE *pfile){
@@ -258,6 +262,22 @@ void test_nTable(FILE *pfile){
         nTableAdd(nt, i, strClone(strings[i % 33]), (funcCmp_t*) &strCmp);
     }
     nTablePrint(nt, pfile, (funcPrint_t*) &strPrint);
+}
+
+void examine_ntable(nTable_t* t, int size)
+{
+    printf("Examine ntable at: %p with value %p\n", &t, t);
+    printf("List array at %p\n", t->listArray);
+    printf("Of size %i\n", t->size);
+    if (t == NULL) return;
+    list_t** first = t->listArray;
+
+    for (int i = 0; i < size; ++i)
+    {
+        printf("Slot %i points at %p\n", i, first);
+        examine_list(*first);
+        first = (list_t**) (8 + (int) first);
+    }
 }
 
 void examine_tree(n3treeElem_t* elem)

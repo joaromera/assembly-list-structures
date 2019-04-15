@@ -955,11 +955,11 @@ nTableNew:
     shl r12, 3
     mov rdi, r12
     call malloc
-    mov r14, rax                                    ; r14 *listarray
+    mov r14, rax                                    ; r14 **listarray
 
     ; r12 size * 8
     ; r13 *ntable
-    ; r14 list* array
+    ; r14 list** array
     xor r15, r15
 .loop:
     cmp r15, r12
@@ -981,6 +981,10 @@ nTableNew:
     ret
 
 nTableAdd:
+    ; rdi <-- ntable*
+    ; rsi <-- slot
+    ; rdx <-- data*
+    ; rcx <-- funcCmp*
     push rbp
     mov rbp, rsp
     push r12
@@ -992,7 +996,7 @@ nTableAdd:
     mov rdi, qword [r12 + rsi]
     mov rsi, rdx
     mov rdx, rcx
-    call listAddFirst
+    call listAdd
     add rsp, 8
     pop r12
     pop rbp
@@ -1062,8 +1066,11 @@ nTableDelete:
     je .end
     ;listDelete(list_t* l, funcDelete_t* fd)
     mov rdi, qword [r12 + r14 * 8]
+    cmp rdi, NULL
+    je .next
     mov rsi, r8
     call listDelete
+.next:
     inc r14
     jmp .loop
 .end:
