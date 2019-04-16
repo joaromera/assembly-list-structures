@@ -959,7 +959,8 @@ nTableNew:
     push r13
     push r14
     push r15
-
+    shl rdi, 32
+    shr rdi, 32
     mov r12, rdi                                    ; r12 size
     mov rdi, NTABLE_SIZE
     call malloc
@@ -1005,7 +1006,8 @@ nTableAdd:
     mov rbp, rsp
     push r12
     sub rsp, 8
-
+    shl rsi, 32
+    shr rsi, 32
     mov r12, qword [rdi + NTABLE_LIST_OFFSET]
     shl rsi, 3
     ;(nTable_t* t, uint32_t slot, void* data, funcCmp_t* fc)
@@ -1030,7 +1032,8 @@ nTableRemoveSlot:
     ; r8  <-- funcDelete_t* fd
     push rbp
     mov rbp, rsp
-    
+    shl rsi, 32
+    shr rsi, 32
     mov rax, qword [rdi + NTABLE_LIST_OFFSET]
     shl rsi, 3
     add rax, rsi
@@ -1049,7 +1052,8 @@ nTableDeleteSlot:       ;(nTable_t* t, uint32_t slot, funcDelete_t* fd)
     mov rbp, rsp
     push r12
     sub rsp, 8
-
+    shl rsi, 32
+    shr rsi, 32
     mov r12, qword [rdi + NTABLE_LIST_OFFSET]
     shl rsi, 3
     add r12, rsi
@@ -1092,7 +1096,11 @@ nTableDelete:
     cmp rdi, NULL
     je .next
     mov rsi, r8
+    push r8
+    sub rsp, 8
     call listDelete
+    add rsp, 8
+    pop r8
 .next:
     inc r14
     jmp .loop
