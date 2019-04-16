@@ -229,22 +229,23 @@ void test(){
     nTable_t *n = nTableNew(32);
     char* strings[10] = {"aa","bb","dd","ff","00","zz","cc","ee","gg","hh"};
     nTableAdd(n, 0, strClone(strings[0]), (funcCmp_t*)&strCmp);
-    nTableAdd(n, 1, strClone(strings[0]), (funcCmp_t*)&strCmp);
-    for(int s=0;s<32;s++)
-    {
-        for(int i=0;i<10;i++)
-        {
-            nTableAdd(n, s, strClone(strings[i]), (funcCmp_t*)&strCmp);
-        }
-    }
-    for(int s=0;s<100;s++)
-    {
-        for(int i=0;i<100;i++)
-        {
-            // nTableRemoveSlot(n, s % 32, strClone(strings[i % 10]), (funcCmp_t*)&strCmp, (funcDelete_t*)&strDelete);
-        }
-    }
-    // nTableRemoveSlot(n, 0, strClone(strings[1]), (funcCmp_t*)&strCmp, (funcDelete_t*)&strDelete);
+    nTableAdd(n, 0, strClone(strings[1]), (funcCmp_t*)&strCmp);
+    // nTableAdd(n, 1, strClone(strings[0]), (funcCmp_t*)&strCmp);
+    // for(int s=0;s<32;s++)
+    // {
+    //     for(int i=0;i<10;i++)
+    //     {
+    //         nTableAdd(n, s, strClone(strings[i]), (funcCmp_t*)&strCmp);
+    //     }
+    // }
+    // for(int s=0;s<100;s++)
+    // {
+    //     for(int i=0;i<100;i++)
+    //     {
+    //         nTableRemoveSlot(n, s % 32, strClone(strings[i % 10]), (funcCmp_t*)&strCmp, (funcDelete_t*)&strDelete);
+    //     }
+    // }
+    nTableRemoveSlot(n, 0, strClone(strings[0]), (funcCmp_t*)&strCmp, (funcDelete_t*)&strDelete);
     examine_ntable(n,32);
     nTableDelete(n, (funcDelete_t*)&strDelete);
 }

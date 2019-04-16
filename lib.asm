@@ -461,8 +461,6 @@ listRemove:
     jmp .loop
 
 .end:
-    mov rdi, r13
-    call r15
     pop r15
     pop r14
     pop r13
