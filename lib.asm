@@ -420,6 +420,7 @@ listRemove:
     cmp rbx, NULL
     je .end
     mov rdi, qword [rbx + ELEM_DATA_OFFSET]
+    mov rsi, r13
     call r14
     cmp rax, NULL
     je .delete
