@@ -410,9 +410,6 @@ listRemove:
     cmp qword [r12 + LIST_FIRST_OFFSET], NULL
     je .end
 
-    cmp r15, NULL
-    jne .useFuncDelete
-    mov r15, free
 .useFuncDelete:
 
     mov rbx, qword [r12 + LIST_FIRST_OFFSET]
@@ -428,8 +425,11 @@ listRemove:
     jmp .loop
 
 .delete:
+    cmp r15, NULL
+    je .dontDeleteData
     mov rdi, qword [rbx + ELEM_DATA_OFFSET]
     call r15
+.dontDeleteData:
     mov rdx, qword [rbx + ELEM_PREV_OFFSET]
     mov rcx, qword [rbx + ELEM_NEXT_OFFSET]
     ; rdx <<< prev
@@ -486,10 +486,6 @@ listRemoveFirst:
     cmp qword [r12 + LIST_FIRST_OFFSET], NULL
     je .end
 
-    cmp r13, NULL
-    jne .useFuncDelete
-    mov r13, free
-
 .useFuncDelete:
     mov r14, qword [r12 + LIST_FIRST_OFFSET]
     cmp qword [r14 + ELEM_NEXT_OFFSET], NULL
@@ -499,8 +495,11 @@ listRemoveFirst:
     mov qword [rcx + ELEM_PREV_OFFSET], NULL
     mov qword [r12 + LIST_FIRST_OFFSET], rcx
 
+    cmp r13, NULL
+    je .dontDeleteData
     mov rdi, qword [r14 + ELEM_DATA_OFFSET]
     call r13
+.dontDeleteData:
     mov rdi, r14
     call free
     jmp .end
@@ -508,8 +507,11 @@ listRemoveFirst:
 .listHasOneElement:
     mov qword [r12 + LIST_FIRST_OFFSET], NULL
     mov qword [r12 + LIST_LAST_OFFSET], NULL
+    cmp r13, NULL
+    je .dontDeleteDatatwo
     mov rdi, qword [r14 + ELEM_DATA_OFFSET]
     call r13
+.dontDeleteDatatwo:
     mov rdi, r14
     call free
 
@@ -596,17 +598,17 @@ listDelete:
     je .end
 
     mov r13, rsi
-    cmp r13, NULL
-    jne .useFuncDelete
-    mov r13, free
 
 .useFuncDelete:
     mov r14, qword [r12 + LIST_FIRST_OFFSET]
 
 .loop:
-    mov r15, qword [r14 + ELEM_NEXT_OFFSET]         ;r15 <-- next
+    mov r15, qword [r14 + ELEM_NEXT_OFFSET]
+    cmp r13, NULL
+    je .dontdeletedata                              ;r15 <-- next
     mov rdi, qword [r14 + ELEM_DATA_OFFSET]
     call r13
+.dontdeletedata:
     mov rdi, r14
     call free
     cmp r15, NULL
@@ -830,10 +832,6 @@ n3treeRemoveEq:
     cmp qword [r12 + N3TREE_FIRST_OFFSET], NULL
     je .end
 
-    cmp r13, NULL
-    jne .useFuncDelete
-    mov r13, free
-
 .useFuncDelete:
     ; r13 = funcDelete
     mov r12, qword [r12 + N3TREE_FIRST_OFFSET]
@@ -889,10 +887,6 @@ n3treeDelete:
 
     cmp qword [r12 + N3TREE_FIRST_OFFSET], NULL
     je .end
-
-    cmp r13, NULL
-    jne .useFuncDelete
-    mov r13, free
 
 .useFuncDelete:
     ; r13 = funcDelete
@@ -1042,7 +1036,6 @@ nTableRemoveSlot:
     mov rdx, rcx
     mov rcx, r8
     call listRemove
-    
     pop rbp
     ret
     

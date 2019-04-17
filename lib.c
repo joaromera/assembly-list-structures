@@ -8,37 +8,28 @@ char* strRange(char* a, uint32_t i, uint32_t f) {
     // strRange("ABC", 2, 10) → "C"
     int len_a = strLen(a);
     char* newStr;
+    
     // Si i>f, retorna el mismo string pasado por par ́ametro
     if (i > f) {
-        char* newStr = malloc(len_a + 1);
-        int c = 0;
-        while(c < len_a)
-        {
-            newStr[c] = a[c];
-            ++c;
-        }
-        newStr[c] = 0;
+        return a;
+    }
+    // si i>len, entonces retorna la string vac ́ıa
+    if (i > len_a) {
+        newStr = strClone("");
         free(a);
         return newStr;
     }
-    // si i>len, entonces retorna la string vac ́ıa
-    if (i > len_a)
-    {
-        newStr = malloc(1);
-        newStr[0] = 0;
-    }
-
+    
     // Genera un nuevo string tomando los caracteres del  ́ındice i al f inclusive
     // Si f>len, se tomar ́a como l ́ımite superior la longitud del string
-    newStr = (f - i) >= 0 ? malloc(f - i + 1) : malloc(len_a + 1);
+    int new_len = f <= len_a ? f - i + 1 : len_a - i;
+    newStr = new_len > 0 ? malloc(new_len + 1) : malloc(len_a + 1);
     int c = 0;
-    while(c < len_a && c <= f)
+    while (c < new_len)
     {
         newStr[c++] = a[i++];
     }
     newStr[c] = 0;
-
-    // libera la memoria ocupada por la string pasada por par ́ametro.
     free(a);
     return newStr;
 }
