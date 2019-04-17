@@ -444,7 +444,7 @@ listRemove:
 .continue:
     cmp rcx, NULL
     jne .nextNotNull
-    mov qword [r12 + LIST_LAST_OFFSET], NULL
+    mov qword [r12 + LIST_LAST_OFFSET], rdx
     jmp .freeNode
 
 .nextNotNull:
@@ -455,7 +455,7 @@ listRemove:
     mov rbx, qword [rbx + ELEM_NEXT_OFFSET]
     cmp rbx, NULL
     jne .freeAndLoop
-    mov qword [r12 + LIST_LAST_OFFSET], rdi
+    mov qword [r12 + LIST_LAST_OFFSET], rdx
 
 .freeAndLoop:
     call free
