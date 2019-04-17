@@ -550,11 +550,7 @@ listRemoveLast:
 
     mov rdi, qword [r14 + ELEM_DATA_OFFSET]
     cmp r13, NULL
-    jne .callRSIfun
-    call free
-    jmp .freeNode
-
-.callRSIfun:
+    je .freeNode
     call r13
     jmp .freeNode
 
@@ -563,11 +559,7 @@ listRemoveLast:
     mov qword [r12 + LIST_LAST_OFFSET], NULL
     mov rdi, qword [r14 + ELEM_DATA_OFFSET]
     cmp r13, NULL
-    jne .callRSIfun2
-    call free
-    jmp .freeNode
-
-.callRSIfun2:
+    je .freeNode
     call r13
 
 .freeNode:
@@ -598,8 +590,6 @@ listDelete:
     je .end
 
     mov r13, rsi
-
-.useFuncDelete:
     mov r14, qword [r12 + LIST_FIRST_OFFSET]
 
 .loop:
