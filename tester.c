@@ -22,12 +22,12 @@ void test_3();
 
 int main() {
     srand(12345);
-    remove(filename_1);
-    test_1();
+    // remove(filename_1);
+    // test_1();
     // remove(filename_2);
     // test_2();
-    // remove(filename_3);
-    // test_3();  
+    remove(filename_3);
+    test_3();  
     return 0;
 }
 
@@ -260,7 +260,7 @@ void test_n3Tree(FILE *pfile) {
     n3treeAdd(t, strClone("21ar"),(funcCmp_t*)&strCmp);
     n3treePrint(t,pfile,(funcPrint_t*)&strPrint);
     fprintf(pfile,"\n");
-    // n3treeRemoveEq
+    // // n3treeRemoveEq
     fprintf(pfile,"==> n3treeRemoveEq\n");
     n3treeRemoveEq(t,(funcDelete_t*)&strDelete);
     n3treePrint(t,pfile,(funcPrint_t*)&strPrint);
@@ -339,8 +339,8 @@ void test_1(char* filename){
     FILE *pfile;
     RUN(filename,test_strings(pfile););
     RUN(filename,test_list(pfile););
-    // RUN(filename,test_nTable(pfile););
-    // RUN(filename,test_n3Tree(pfile););
+    RUN(filename,test_nTable(pfile););
+    RUN(filename,test_n3Tree(pfile););
 }
 
 void test_2(char* filename){
@@ -394,17 +394,17 @@ void test_3(char* filename){
     n3tree_t *t = n3treeNew();
     nTable_t *n = nTableNew(32);
     RUN(filename, listPrint(l, pfile, (funcPrint_t*)&strPrint);)NL(filename)
-    RUN(filename, n3treePrint(t, pfile, (funcPrint_t*)&strPrint);)NL(filename)
-    RUN(filename, nTablePrint(n, pfile, (funcPrint_t*)&strPrint);)NL(filename)
+    // RUN(filename, n3treePrint(t, pfile, (funcPrint_t*)&strPrint);)NL(filename)
+    // RUN(filename, nTablePrint(n, pfile, (funcPrint_t*)&strPrint);)NL(filename)
     for(int s=0;s<40;s++) {
         for(int i=0;i<1000;i++) {
                 listAdd(l, randomString(rand()%10+1), (funcCmp_t*)&strCmp);
-                n3treeAdd(t, randomString(rand()%10+1), (funcCmp_t*)&strCmp);
-                nTableAdd(n, rand()%32, randomString(rand()%10+1), (funcCmp_t*)&strCmp);
+                // n3treeAdd(t, randomString(rand()%10+1), (funcCmp_t*)&strCmp);
+                // nTableAdd(n, rand()%32, randomString(rand()%10+1), (funcCmp_t*)&strCmp);
             }}
     RUN(filename, listPrint(l, pfile, (funcPrint_t*)&strPrint);)NL(filename)
-    RUN(filename, n3treePrint(t, pfile, (funcPrint_t*)&strPrint);)NL(filename)
-    RUN(filename, nTablePrint(n, pfile, (funcPrint_t*)&strPrint);)NL(filename)
+    // RUN(filename, n3treePrint(t, pfile, (funcPrint_t*)&strPrint);)NL(filename)
+    // RUN(filename, nTablePrint(n, pfile, (funcPrint_t*)&strPrint);)NL(filename)
     for(int i=0;i<1000;i++) {
             char* a = randomString(rand()%3+1);
             listRemove(l, a, (funcCmp_t*)&strCmp, (funcDelete_t*)&strDelete);
@@ -413,8 +413,8 @@ void test_3(char* filename){
             strDelete(a);
     }
     RUN(filename, listPrint(l, pfile, (funcPrint_t*)&strPrint);)NL(filename)
-    RUN(filename, n3treePrint(t, pfile, (funcPrint_t*)&strPrint);)NL(filename)
-    RUN(filename, nTablePrint(n, pfile, (funcPrint_t*)&strPrint);)NL(filename)
+    // RUN(filename, n3treePrint(t, pfile, (funcPrint_t*)&strPrint);)NL(filename)
+    // RUN(filename, nTablePrint(n, pfile, (funcPrint_t*)&strPrint);)NL(filename)
     listDelete(l, (funcDelete_t*)&strDelete);
     n3treeDelete(t, (funcDelete_t*)&strDelete);
     nTableDelete(n, (funcDelete_t*)&strDelete);

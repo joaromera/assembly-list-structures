@@ -85,17 +85,19 @@ void n3treePrint(n3tree_t* t, FILE *pFile, funcPrint_t* fp) {
 
 void nTableRemoveAll(nTable_t* t, void* data, funcCmp_t* fc, funcDelete_t* fd) {
     int table_size = t->size;
+    list_t** list = t->listArray;
     for (int i = 0; i < table_size; ++i)
     {
-        listRemove((list_t*) &t[i], data, fc, fd);
+        listRemove(list[i], data, fc, fd);
     }
 }
 
 void nTablePrint(nTable_t* t, FILE *pFile, funcPrint_t* fp) {
     int table_size = t->size;
+    list_t** list = t->listArray;
     for (int i = 0; i < table_size; ++i)
     {
         fprintf(pFile, "%d = ", i);
-        listPrint((list_t*) &t[i], pFile, fp);
+        listPrint(list[i], pFile, fp);
     }
 }

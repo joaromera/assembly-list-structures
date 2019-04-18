@@ -10,6 +10,12 @@ section .rodata
 
 section .text
 
+; %define NULL_STRING "NULL\0"
+; %define OPEN_BRACKET "[\0"
+; %define COMMA ",\0"
+; %define CLOSE_BRACKET "]\0"
+; %define POINTER_FORMAT "%p\0"
+
 %define NULL 0
 %define POINTER_SIZE 8
 
@@ -214,19 +220,27 @@ strDelete:
 
 
 strPrint:
+    ; strPrint(char* a,
+    ; FILE *pFile)
     push rbp
     mov rbp, rsp
+    
+    push rdi
+    push rsi
+    call strLen
+    pop rdi
+    pop rsi
 
-    cmp byte [rdi], NULL
+    cmp rax, NULL
     je .printNULL
 
-    xchg rdi, rsi
+    ; xchg rdi, rsi
     call fprintf
     jmp .end
 
 .printNULL:
     mov rdi, qword NULL_STRING
-    xchg rdi, rsi
+    ; xchg rdi, rsi
     call fprintf
 
 .end:
@@ -409,8 +423,6 @@ listRemove:
 
     cmp qword [r12 + LIST_FIRST_OFFSET], NULL
     je .end
-
-.useFuncDelete:
 
     mov rbx, qword [r12 + LIST_FIRST_OFFSET]
 .loop:
@@ -632,7 +644,7 @@ listPrint:
     mov r14, rdx 
     
     mov rdi, r13
-    mov rsi, qword OPEN_BRACKET
+    mov rsi, OPEN_BRACKET
     call fprintf
     
     cmp qword [r12 + LIST_FIRST_OFFSET], NULL
@@ -640,10 +652,18 @@ listPrint:
     mov rbx, qword [r12 + LIST_FIRST_OFFSET]
 
 .loop:
+    cmp rbx, NULL
+    je .end
+    mov rdi, qword [rbx + ELEM_DATA_OFFSET]
+    cmp rdi, NULL
+    je .nextElement
     cmp r14, NULL
     je .printPointer
-    mov rdi, qword [rbx + ELEM_DATA_OFFSET]
     mov rsi, r13
+    ; strPrint(char* a, FILE *pFile)
+    ; rdi <-- *list
+    ; rsi <-- *pFile
+    ; rdx <-- *funcPrint
     call r14
 
     jmp .nextElement
@@ -659,7 +679,7 @@ listPrint:
     je .end
 
     mov rdi, r13
-    mov rsi, qword COMMA
+    mov rsi, COMMA
     call fprintf
 
     mov rbx, qword [rbx + ELEM_NEXT_OFFSET]
@@ -667,7 +687,7 @@ listPrint:
 
 .end:
     mov rdi, r13
-    mov rsi, qword CLOSE_BRACKET
+    mov rsi, CLOSE_BRACKET
     call fprintf
 
     pop r14
@@ -906,7 +926,10 @@ deleteAllNodes:
 
     mov r14, r12
     mov rdi, qword [r12 + N3TREE_ELEM_DATA_OFFSET]
+    cmp r13, NULL
+    je .dontdelete
     call r13
+.dontdelete:
     cmp qword [r12 + N3TREE_ELEM_CENTER_OFFSET], NULL
     je .noList
     mov rdi, qword [r12 + N3TREE_ELEM_CENTER_OFFSET]
@@ -991,6 +1014,17 @@ nTableAdd:
     sub rsp, 8
     shl rsi, 32
     shr rsi, 32
+
+    push rdx
+    push rcx
+    xor rdx, rdx
+    mov rax, rsi
+    mov rcx, qword [rdi + NTABLE_SIZE_OFFSET]
+    div ecx
+    mov esi, edx
+    pop rcx
+    pop rdx
+
     mov r12, qword [rdi + NTABLE_LIST_OFFSET]
     shl rsi, 3
     ;(nTable_t* t, uint32_t slot, void* data, funcCmp_t* fc)
@@ -999,7 +1033,6 @@ nTableAdd:
     mov rsi, rdx
     mov rdx, rcx
     call listAdd
-    
     add rsp, 8
     pop r12
     pop rbp
@@ -1017,6 +1050,17 @@ nTableRemoveSlot:
     mov rbp, rsp
     shl rsi, 32
     shr rsi, 32
+    
+    push rdx
+    push rcx
+    xor rdx, rdx
+    mov rax, rsi
+    mov rcx, qword [rdi + NTABLE_SIZE_OFFSET]
+    div ecx
+    mov esi, edx
+    pop rcx
+    pop rdx
+
     mov rax, qword [rdi + NTABLE_LIST_OFFSET]
     shl rsi, 3
     add rax, rsi
@@ -1036,6 +1080,17 @@ nTableDeleteSlot:       ;(nTable_t* t, uint32_t slot, funcDelete_t* fd)
     sub rsp, 8
     shl rsi, 32
     shr rsi, 32
+
+    push rdx
+    push rcx
+    xor rdx, rdx
+    mov rax, rsi
+    mov rcx, qword [rdi + NTABLE_SIZE_OFFSET]
+    div ecx
+    mov esi, edx
+    pop rcx
+    pop rdx
+
     mov r12, qword [rdi + NTABLE_LIST_OFFSET]
     shl rsi, 3
     add r12, rsi
@@ -1058,14 +1113,14 @@ nTableDelete:
     ; rsi <-- funcDelete_t* fd
     push rbp
     mov rbp, rsp
-    push r8
+    push rbx
     push r12
     push r13
     push r14
     push r15
     sub rsp, 8
 
-    mov r8, rsi
+    mov rbx, rsi
     mov r12, qword [rdi + NTABLE_LIST_OFFSET]
     mov r13, qword [rdi + NTABLE_SIZE_OFFSET]
     xor r14, r14
@@ -1073,16 +1128,9 @@ nTableDelete:
 .loop:
     cmp r14, r13
     je .end
-    ;listDelete(list_t* l, funcDelete_t* fd)
     mov rdi, qword [r12 + r14 * 8]
-    cmp rdi, NULL
-    je .next
-    mov rsi, r8
-    push r8
-    sub rsp, 8
+    mov rsi, rbx
     call listDelete
-    add rsp, 8
-    pop r8
 .next:
     inc r14
     jmp .loop
@@ -1093,10 +1141,10 @@ nTableDelete:
     call free
 
     add rsp, 8
-    pop r8
     pop r15
     pop r14
     pop r13
     pop r12
+    pop rbx
     pop rbp
     ret
