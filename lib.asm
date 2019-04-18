@@ -5,6 +5,7 @@ OPEN_BRACKET db '[',0
 COMMA db ',',0
 CLOSE_BRACKET db ']',0
 POINTER_FORMAT db '%p',0
+STRING_FORMAT db '%s',0
 
 section .rodata
 
@@ -233,7 +234,8 @@ strPrint:
 
     cmp rax, NULL
     je .printNULL
-
+    mov rdx, rsi
+    mov rsi, STRING_FORMAT
     ; xchg rdi, rsi
     call fprintf
     jmp .end
