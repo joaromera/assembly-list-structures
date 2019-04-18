@@ -241,7 +241,7 @@ strPrint:
     jmp .end
 
 .printNULL:
-    mov rdi, qword NULL_STRING
+    mov rsi, qword NULL_STRING
     ; xchg rdi, rsi
     call fprintf
 
@@ -843,9 +843,6 @@ n3treeRemoveEq:
 
     cmp qword [r12 + N3TREE_FIRST_OFFSET], NULL
     je .end
-
-.useFuncDelete:
-    ; r13 = funcDelete
     mov r12, qword [r12 + N3TREE_FIRST_OFFSET]
     call searchAndRemoveEQ
 
@@ -856,6 +853,8 @@ n3treeRemoveEq:
     ret
 
 searchAndRemoveEQ:
+    ; rdi <-- n3tree_t eleme* t
+    ; rsi <-- funcDelete_t* fd
     push rbp
     mov rbp, rsp
     push r12
