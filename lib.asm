@@ -11,12 +11,6 @@ section .rodata
 
 section .text
 
-; %define NULL_STRING "NULL\0"
-; %define OPEN_BRACKET "[\0"
-; %define COMMA ",\0"
-; %define CLOSE_BRACKET "]\0"
-; %define POINTER_FORMAT "%p\0"
-
 %define NULL 0
 %define POINTER_SIZE 8
 
@@ -846,9 +840,6 @@ n3treeRemoveEq:
 
     cmp qword [r12 + N3TREE_FIRST_OFFSET], NULL
     je .end
-
-.useFuncDelete:
-    ; r13 = funcDelete
     mov r12, qword [r12 + N3TREE_FIRST_OFFSET]
     call searchAndRemoveEQ
 
@@ -859,6 +850,8 @@ n3treeRemoveEq:
     ret
 
 searchAndRemoveEQ:
+    ; rdi <-- n3tree_t eleme* t
+    ; rsi <-- funcDelete_t* fd
     push rbp
     mov rbp, rsp
     push r12
