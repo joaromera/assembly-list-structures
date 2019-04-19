@@ -67,18 +67,17 @@ void n3treePrintAux(n3treeElem_t* t, FILE *pFile, funcPrint_t* fp) {
     n3treePrintAux(t->left, pFile, fp);
     //center
     fprintf(pFile, "%s", t->data);
-    listPrint(t->center, pFile, fp);
-    fprintf(pFile, ",");
+    if (t->center->first != NULL)
+        listPrint(t->center, pFile, fp);
+    fprintf(pFile, " ");
     //right
     n3treePrintAux(t->right, pFile, fp);
-    
-
 }
 
 void n3treePrint(n3tree_t* t, FILE *pFile, funcPrint_t* fp) {
     fprintf(pFile, "<< ");
     n3treePrintAux(t->first, pFile, fp);
-    fprintf(pFile, " >>");
+    fprintf(pFile, ">>");
 }
 
 /** nTable **/
@@ -99,5 +98,6 @@ void nTablePrint(nTable_t* t, FILE *pFile, funcPrint_t* fp) {
     {
         fprintf(pFile, "%d = ", i);
         listPrint(list[i], pFile, fp);
+        fprintf(pFile, "\n");
     }
 }

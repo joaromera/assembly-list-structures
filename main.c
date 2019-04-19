@@ -247,7 +247,7 @@ void test(){
     nTableDelete(n, 0);
 }
 
-void jodita() {};
+void breakpoint() {};
 
 void test_n3tree(FILE *pfile){
     n3tree_t* n3t = n3treeNew();
@@ -343,7 +343,7 @@ int main (void){
     test_n3tree(pfile);
     test_nTable(pfile);
     fclose(pfile);
-    
+    // n3treeRemoveTest();
     return 0;
 }
 
@@ -354,4 +354,17 @@ void strRangeTest() {
         // printf("%s\n",b);
         strDelete(b);
     }
+}
+
+void n3treeRemoveTest() {
+    n3tree_t* n3t = n3treeNew();
+    char* strings[25] = {"1","1","1","1","0","0","0","2","2","2","2","3","3","3","3","4","4","5","5","5","5","6","7","7","7"};
+    for(int i = 0; i < 25; ++i)
+    {
+        n3treeAdd(n3t, strClone(strings[i]), (funcCmp_t*)&strCmp);
+    }
+    examine_tree(n3t->first);
+    n3treeRemoveEq(n3t, (funcDelete_t*)&strDelete);
+    examine_tree(n3t->first);
+    n3treeDelete(n3t,(funcDelete_t*)&strDelete);
 }

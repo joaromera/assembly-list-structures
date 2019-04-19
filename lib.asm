@@ -5,6 +5,7 @@ OPEN_BRACKET db '[',0
 COMMA db ',',0
 CLOSE_BRACKET db ']',0
 POINTER_FORMAT db '%p',0
+STRING_FORMAT db '%s',0
 
 section .rodata
 
@@ -234,13 +235,14 @@ strPrint:
     cmp rax, NULL
     je .printNULL
 
-    ; xchg rdi, rsi
+    mov rdx, rsi
+    mov rsi, STRING_FORMAT
     call fprintf
     jmp .end
 
 .printNULL:
-    mov rdi, qword NULL_STRING
-    ; xchg rdi, rsi
+    mov rdx, qword NULL_STRING
+    mov rsi, STRING_FORMAT
     call fprintf
 
 .end:
@@ -609,6 +611,7 @@ listDelete:
     cmp r13, NULL
     je .dontdeletedata                              ;r15 <-- next
     mov rdi, qword [r14 + ELEM_DATA_OFFSET]
+    mov qword [r14 + ELEM_DATA_OFFSET], NULL
     call r13
 .dontdeletedata:
     mov rdi, r14
@@ -619,6 +622,8 @@ listDelete:
     jmp .loop
 
 .end:
+    mov qword [r12 + LIST_FIRST_OFFSET], NULL
+    mov qword [r12 + LIST_LAST_OFFSET], NULL
     mov rdi, r12
     call free
     pop r15
@@ -864,6 +869,7 @@ searchAndRemoveEQ:
     mov rdi, qword [r12 + N3TREE_ELEM_CENTER_OFFSET]
     mov rsi, r13
     call listDelete
+    mov qword [r12 + N3TREE_ELEM_CENTER_OFFSET], NULL
     call listNew
     mov qword [r12 + N3TREE_ELEM_CENTER_OFFSET], rax
 .noList:
