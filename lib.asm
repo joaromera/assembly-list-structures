@@ -868,13 +868,21 @@ searchAndRemoveEQ:
 .noList:
     cmp qword [r12 + N3TREE_ELEM_LEFT_OFFSET], NULL
     je .noLeft
+    push r12
+    push r13
     mov r12, qword [r12 + N3TREE_ELEM_LEFT_OFFSET]
     call searchAndRemoveEQ
+    pop r13
+    pop r12
 .noLeft:
     cmp qword [r12 + N3TREE_ELEM_RIGHT_OFFSET], NULL
     je .noRight
+    push r12
+    push r13
     mov r12, qword [r12 + N3TREE_ELEM_RIGHT_OFFSET]
     call searchAndRemoveEQ
+    pop r13
+    pop r12
 .noRight:
     pop r13
     pop r12

@@ -66,7 +66,11 @@ void n3treePrintAux(n3treeElem_t* t, FILE *pFile, funcPrint_t* fp) {
     //left
     n3treePrintAux(t->left, pFile, fp);
     //center
-    fprintf(pFile, "%s", t->data);
+    if (fp == NULL) {
+        fprintf(pFile, "%p", t->data);
+    } else {
+        fp(t->data,pFile);
+    }
     if (t->center->first != NULL)
         listPrint(t->center, pFile, fp);
     fprintf(pFile, " ");
