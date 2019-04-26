@@ -66,16 +66,16 @@ global nTableDeleteSlot
 global nTableDelete
 
 strLen:
+    ; rdi <-- char* a
     push rbp
     mov rbp, rsp
     xor rax, rax
 
-.loop:
-    cmp byte [rdi], NULL
+.countByByte:
+    cmp byte [rdi + rax], NULL      ; cuento en rax cada byte != 0
     je .end
     inc rax
-    inc rdi
-    jmp .loop
+    jmp .countByByte
 
 .end:
     pop rbp
@@ -83,6 +83,7 @@ strLen:
 
 
 strClone:
+    ; rdi <-- char* a
     push rbp
     mov rbp, rsp
     push r12
@@ -90,22 +91,22 @@ strClone:
 
     mov r12, rdi
     call strLen
-    mov r13, rax
+    mov r13, rax                ; preservo length del string
     mov rdi, rax
-    inc rdi
+    inc rdi                     ; necesito un byte extra para el \0
     call malloc
     
     xor rcx, rcx
-.loop:
-    cmp rcx, r13
+.copyEachByte:
+    cmp rcx, r13                ; copio byte a byte
     je .end
     mov r10b, byte [r12 + rcx]
     mov byte [rax + rcx], r10b
     inc rcx
-    jmp .loop
+    jmp .copyEachByte
 
 .end:
-    mov byte [rax + rcx], NULL
+    mov byte [rax + rcx], NULL  ; agrego \0 al final
     pop r13
     pop r12
     pop rbp
@@ -113,12 +114,14 @@ strClone:
 
 
 strCmp:
+    ; rdi <-- char *a
+    ; rsi <-- char *b
     push rbp
     mov rbp, rsp
     xor rax, rax
     xor rcx, rcx
 
-.loop:
+.compareNextByte:
     cmp byte [rdi + rcx], NULL
     je .rdiMaybeShortest
     mov dl, byte [rdi + rcx]
@@ -126,11 +129,11 @@ strCmp:
     jg .rdiSmaller
     jl .rsiSmaller
     inc rcx
-    jmp .loop
+    jmp .compareNextByte
 
 .rdiMaybeShortest:
     cmp byte [rsi + rcx], NULL
-    je .end                         ; a = b
+    je .end                         ; a = b & rax = 0.
 
 .rdiSmaller:
     mov rax, 1
@@ -143,7 +146,10 @@ strCmp:
     pop rbp
     ret
 
+
 strConcat:
+    ; rdi <-- char *a
+    ; rsi <-- char *b
     push rbp
     mov rbp, rsp
     push r12
@@ -151,14 +157,14 @@ strConcat:
     push r14
     sub rsp, 8
 
-    mov r12, rdi
-    mov r13, rsi
+    mov r12, rdi                    ; r12 <-- char*a
+    mov r13, rsi                    ; r13 <-- char*b
     call strLen
     mov r14, rax
     mov rdi, r13
     call strLen
-    add r14, rax
-    inc r14
+    add r14, rax                    ; r14 <-- len(a) + len(b)
+    inc r14                         ; byte para \0
     mov rdi, r14
     call malloc
     mov r14, rax
@@ -196,7 +202,6 @@ strConcat:
     mov rdi, r12
     call strDelete
 
-
     mov rax, r14
     add rsp, 8
     pop r14
@@ -207,6 +212,7 @@ strConcat:
 
 
 strDelete:
+    ; rdi <-- char+a
     push rbp
     mov rbp, rsp
     call free
@@ -215,8 +221,8 @@ strDelete:
 
 
 strPrint:
-    ; strPrint(char* a,
-    ; FILE *pFile)
+    ; rdi <-- char* a
+    ; rsi <-- *pFile
     push rbp
     mov rbp, rsp
     
@@ -271,6 +277,7 @@ listAddFirst:
     mov qword [rax + ELEM_DATA_OFFSET], rsi
     mov qword [rax + ELEM_NEXT_OFFSET], NULL
     mov qword [rax + ELEM_PREV_OFFSET], NULL
+
     cmp qword [rdi + LIST_FIRST_OFFSET], NULL
     jne .notFirstToAdd
 
@@ -323,42 +330,40 @@ listAddLast:
     pop rbp
     ret
 
-; void listAdd(list_t* l, void* data, funcCmp_t* fc)
-; Agrega un nuevo nodo que almacene data, respetando el orden dado por la funci ́on f.
+
 listAdd:
     ; rdi list_t * l
     ; rsi void* data
     ; rdx funcCmp_t *
     push rbp
     mov rbp, rsp
-    push r8
     push r12
     push r13
     push r14
     push r15
-    sub rsp, 8
-    xor r8, r8
+
+    ; muevo registros para preservarlos
     mov r12, rdi
     mov r13, qword [rdi + LIST_FIRST_OFFSET]
     mov r14, rsi
     mov r15, rdx
 
-    cmp r13, NULL
-    jne .loop
-    mov rdi, r12
+    cmp r13, NULL       ; lista con elementos, busco lugar para insertar
+    jne .searchWhereToAdd
+    mov rdi, r12            
     call listAddFirst
     jmp .end
 
-.loop:
+.searchWhereToAdd:
     mov rdi, r14
     mov rsi, qword [r13 + ELEM_DATA_OFFSET]
-    call r15
+    call r15                                    ; comparo usando *funcComp
     cmp rax, -1
     jne .addHere
     mov r13, qword [r13 + ELEM_NEXT_OFFSET]
     cmp r13, NULL
     je .addLast
-    jmp .loop
+    jmp .searchWhereToAdd
 
 .addHere:
     mov rdi, ELEM_SIZE
@@ -370,14 +375,13 @@ listAdd:
     mov qword [rax + ELEM_DATA_OFFSET], r14
     mov qword [rax + ELEM_PREV_OFFSET], rdi
     mov qword [rax + ELEM_NEXT_OFFSET], r13
-
     mov qword [r13 + ELEM_PREV_OFFSET], rax
-    cmp rdi, NULL
+    cmp rdi, NULL   ; si no hay previo actualizo primero de la lista
     je .newFirst
     mov qword [rdi + ELEM_NEXT_OFFSET], rax
     jmp .end
 
-.addLast:
+.addLast:               ; reutilizo listaddlast si va al final
     mov rdi, r12
     mov rsi, r14
     call listAddLast
@@ -387,18 +391,14 @@ listAdd:
     mov qword [r12 + LIST_FIRST_OFFSET], rax
 
 .end:
-    add rsp, 8
     pop r15
     pop r14
     pop r13
     pop r12
-    pop r8
     pop rbp
     ret
 
-; Borra todos los nodos de la lista cuyo dato sea igual al contenido de data
-; segu ́n la funci ́on de comparaci ́on apuntada por fc. 
-; Si fd no es cero, utiliza la funci ́on para borrar los datos en cuesti ́on.
+
 listRemove:
     ;rdi list_t* l
     ;rsi void* data
@@ -407,21 +407,22 @@ listRemove:
     push rbp
     mov rbp, rsp
     push rbx
-    push r8
     push r12
     push r13
     push r14
     push r15
+    sub rsp, 8
     mov r12, rdi
     mov r13, rsi
     mov r14, rdx
     mov r15, rcx
 
-    cmp qword [r12 + LIST_FIRST_OFFSET], NULL
+    cmp qword [r12 + LIST_FIRST_OFFSET], NULL   ; check empty list
     je .end
 
     mov rbx, qword [r12 + LIST_FIRST_OFFSET]
-.loop:
+.nextElement:
+    ; la comparacion se hace llamando a r14
     cmp rbx, NULL
     je .end
     mov rdi, qword [rbx + ELEM_DATA_OFFSET]
@@ -430,14 +431,13 @@ listRemove:
     cmp rax, NULL
     je .delete
     mov rbx, qword [rbx + ELEM_NEXT_OFFSET]
-    jmp .loop
-
-.delete:
+    jmp .nextElement
+.delete:                                        ; en r15 func delete
     cmp r15, NULL
     je .dontDeleteData
     mov rdi, qword [rbx + ELEM_DATA_OFFSET]
     call r15
-.dontDeleteData:
+.dontDeleteData:                                ; si funcdelete = 0 no borro el elemento
     mov rdx, qword [rbx + ELEM_PREV_OFFSET]
     mov rcx, qword [rbx + ELEM_NEXT_OFFSET]
     ; rdx <<< prev
@@ -446,35 +446,30 @@ listRemove:
     jne .prevNotNull
     mov qword [r12 + LIST_FIRST_OFFSET], rcx
     jmp .continue
-
-.prevNotNull:
+.prevNotNull:                                   ; re asigno links entre elementos
     mov qword [rdx + ELEM_NEXT_OFFSET], rcx
 .continue:
     cmp rcx, NULL
     jne .nextNotNull
     mov qword [r12 + LIST_LAST_OFFSET], rdx
     jmp .freeNode
-
 .nextNotNull:
     mov qword [rcx + ELEM_PREV_OFFSET], rdx
-
-.freeNode:
+.freeNode:                                      ; ahora libero la memoria del nodo
     mov rdi, rbx
     mov rbx, qword [rbx + ELEM_NEXT_OFFSET]
     cmp rbx, NULL
     jne .freeAndLoop
     mov qword [r12 + LIST_LAST_OFFSET], rdx
-
 .freeAndLoop:
     call free
-    jmp .loop
-
+    jmp .nextElement
 .end:
+    add rsp, 8
     pop r15
     pop r14
     pop r13
     pop r12
-    pop r8
     pop rbx
     pop rbp
     ret
@@ -491,35 +486,32 @@ listRemoveFirst:
     mov r12, rdi
     mov r13, rsi
 
-    cmp qword [r12 + LIST_FIRST_OFFSET], NULL
+    cmp qword [r12 + LIST_FIRST_OFFSET], NULL       ; check si len(lista)=0
     je .end
 
 .useFuncDelete:
     mov r14, qword [r12 + LIST_FIRST_OFFSET]
-    cmp qword [r14 + ELEM_NEXT_OFFSET], NULL
+    cmp qword [r14 + ELEM_NEXT_OFFSET], NULL        ; check si hay un solo elemento
     je .listHasOneElement
 
     mov rcx, qword [r14 + ELEM_NEXT_OFFSET]
     mov qword [rcx + ELEM_PREV_OFFSET], NULL
-    mov qword [r12 + LIST_FIRST_OFFSET], rcx
+    mov qword [r12 + LIST_FIRST_OFFSET], rcx        ; reasigno el puntero al primero
 
     cmp r13, NULL
-    je .dontDeleteData
-    mov rdi, qword [r14 + ELEM_DATA_OFFSET]
+    je .deleteNode                                  ; si funcdelete es 0 no borro dato
+    mov rdi, qword [r14 + ELEM_DATA_OFFSET]         ; por lo que no se hace rdi <-- data
     call r13
-.dontDeleteData:
-    mov rdi, r14
-    call free
-    jmp .end
+    jmp .deleteNode
 
 .listHasOneElement:
-    mov qword [r12 + LIST_FIRST_OFFSET], NULL
+    mov qword [r12 + LIST_FIRST_OFFSET], NULL       ; si era el unico elemento re asigno punteros de list
     mov qword [r12 + LIST_LAST_OFFSET], NULL
     cmp r13, NULL
-    je .dontDeleteDatatwo
+    je .deleteNode
     mov rdi, qword [r14 + ELEM_DATA_OFFSET]
     call r13
-.dontDeleteDatatwo:
+.deleteNode:
     mov rdi, r14
     call free
 
@@ -545,11 +537,11 @@ listRemoveLast:
     mov r12, rdi
     mov r13, rsi
 
-    cmp qword [r12 + LIST_LAST_OFFSET], NULL
+    cmp qword [r12 + LIST_LAST_OFFSET], NULL        ; check list empty
     je .end
 
     mov r14, qword [r12 + LIST_LAST_OFFSET]
-    cmp qword [r14 + ELEM_PREV_OFFSET], NULL
+    cmp qword [r14 + ELEM_PREV_OFFSET], NULL        ; one element
     je .listHasOneElement
 
     mov r15, qword [r14 + ELEM_PREV_OFFSET]
@@ -582,7 +574,6 @@ listRemoveLast:
     ret
 
 
-
 listDelete:
     ; rdi <-- *list
     ; rsi <-- *funcdelete
@@ -594,30 +585,28 @@ listDelete:
     push r15
 
     mov r12, rdi
-    cmp qword [r12 + LIST_FIRST_OFFSET], NULL
+    cmp qword [r12 + LIST_FIRST_OFFSET], NULL   ; check list empty
     je .end
 
     mov r13, rsi
-    mov r14, qword [r12 + LIST_FIRST_OFFSET]
+    mov r14, qword [r12 + LIST_FIRST_OFFSET]    ; r14 <-- current node
 
 .loop:
     mov r15, qword [r14 + ELEM_NEXT_OFFSET]
     cmp r13, NULL
-    je .dontdeletedata                              ;r15 <-- next
+    je .deleteNode                              ;r15 <-- next node
     mov rdi, qword [r14 + ELEM_DATA_OFFSET]
     mov qword [r14 + ELEM_DATA_OFFSET], NULL
     call r13
-.dontdeletedata:
+.deleteNode:
     mov rdi, r14
     call free
-    cmp r15, NULL
+    cmp r15, NULL                               ; check if end of list
     je .end
     mov r14, r15
     jmp .loop
 
 .end:
-    mov qword [r12 + LIST_FIRST_OFFSET], NULL
-    mov qword [r12 + LIST_LAST_OFFSET], NULL
     mov rdi, r12
     call free
     pop r15
@@ -650,15 +639,15 @@ listPrint:
     je .end
     mov rbx, qword [r12 + LIST_FIRST_OFFSET]
 
-.loop:
-    cmp rbx, NULL
+.printEachElement:
+    cmp rbx, NULL                               ; end of list?
     je .end
-    mov rdi, qword [rbx + ELEM_DATA_OFFSET]
-    cmp rdi, NULL
+    mov rdi, qword [rbx + ELEM_DATA_OFFSET]     ; rdi <-- *data
+    cmp rdi, NULL                               ; if pointer to data is null print next
     je .nextElement
-    cmp r14, NULL
+    cmp r14, NULL                               ; if no print functon print pointer
     je .printPointer
-    mov rsi, r13
+    mov rsi, r13                                ; (*pFile)
     ; strPrint(char* a, FILE *pFile)
     ; rdi <-- *list
     ; rsi <-- *pFile
@@ -682,7 +671,7 @@ listPrint:
     call fprintf
 
     mov rbx, qword [rbx + ELEM_NEXT_OFFSET]
-    jmp .loop
+    jmp .printEachElement
 
 .end:
     mov rdi, r13
@@ -695,6 +684,7 @@ listPrint:
     pop rbx
     pop rbp
     ret
+
 
 n3treeNew:
     push rbp
@@ -717,14 +707,14 @@ n3treeAdd:
     push r13
     push r14
     sub rsp, 8
-    mov r12, rdi
-    mov r13, rsi
-    mov r14, rdx
+    mov r12, rdi    ; *n3tree
+    mov r13, rsi    ; *data
+    mov r14, rdx    ; *funcCmp
 
-    cmp qword [rdi + N3TREE_FIRST_OFFSET], NULL
+    cmp qword [rdi + N3TREE_FIRST_OFFSET], NULL     ; empty n3tree
     je .firstElem
 
-    mov r12, qword [rdi + N3TREE_FIRST_OFFSET]
+    mov r12, qword [rdi + N3TREE_FIRST_OFFSET]      ; if not empty search where to add
     call search
     jmp .end
 
@@ -740,6 +730,7 @@ n3treeAdd:
     pop rbp
     ret
 
+
 search:
     ; r12 <-- *elem
     ; r13 <-- void* data
@@ -747,19 +738,18 @@ search:
     push rbp
     mov rbp, rsp
     push r12
-    push r13
-    push r14
     sub rsp, 8
     
-    mov rdi, qword [r12 + N3TREE_ELEM_DATA_OFFSET]
-    mov rsi, r13
-    call r14
+    mov rdi, qword [r12 + N3TREE_ELEM_DATA_OFFSET]      ; rdi <-- *data de nodo actual
+    mov rsi, r13                                        ; rsi <-- *data para agregar
+    call r14                                            ; comparo para saber si ir izq, der o agregar
     cmp rax, NULL
     jl .goLeft
     jg .goRight
     call addElemToList
     jmp .end
 
+    ; en cada chequeo si la sub rama es NULL creo un nuevo nodo y agrego
 .goLeft:
     cmp qword [r12 + N3TREE_ELEM_LEFT_OFFSET], NULL
     jne .leftNotNull
@@ -785,30 +775,27 @@ search:
 
 .end:
     add rsp, 8
-    pop r14
-    pop r13
     pop r12
     pop rbp
     ret
 
+
 addElemToList:
+    ; r12 <-- *ntree_elem actual
+    ; r13 <-- *data para agregar
     push rbp
     mov rbp, rsp
-    push r12
-    push r13
     mov rdi, qword [r12 + N3TREE_ELEM_CENTER_OFFSET]
     mov rsi, r13
     call listAddFirst
-    pop r13
-    pop r12
     pop rbp
     ret
 
+
 createNewNodeAndInsert:
+    ; r13 <-- *data para agregar
     push rbp
     mov rbp, rsp
-    push r13
-    sub rsp, 8
     mov rdi, N3TREE_ELEM_SIZE
     call malloc
     
@@ -823,10 +810,9 @@ createNewNodeAndInsert:
     add rsp, 8
     pop rax
     mov qword [rax + N3TREE_ELEM_CENTER_OFFSET], rdi
-    add rsp, 8
-    pop r13
     pop rbp
     ret
+
 
 n3treeRemoveEq:
     ; rdi <-- n3tree_t* t
@@ -838,7 +824,7 @@ n3treeRemoveEq:
     mov r12, rdi
     mov r13, rsi
 
-    cmp qword [r12 + N3TREE_FIRST_OFFSET], NULL
+    cmp qword [r12 + N3TREE_FIRST_OFFSET], NULL     ; check empty n3tree
     je .end
     mov r12, qword [r12 + N3TREE_FIRST_OFFSET]
     call searchAndRemoveEQ
@@ -848,6 +834,7 @@ n3treeRemoveEq:
     pop r12
     pop rbp
     ret
+
 
 searchAndRemoveEQ:
     ; rdi <-- n3tree_t eleme* t
@@ -859,14 +846,13 @@ searchAndRemoveEQ:
 
     cmp qword [r12 + N3TREE_ELEM_CENTER_OFFSET], NULL
     je .noList
-    mov rdi, qword [r12 + N3TREE_ELEM_CENTER_OFFSET]
+    mov rdi, qword [r12 + N3TREE_ELEM_CENTER_OFFSET]        ; delete list
     mov rsi, r13
-    call listDelete
-    mov qword [r12 + N3TREE_ELEM_CENTER_OFFSET], NULL
-    call listNew
+    call listDelete       
+    call listNew                                            ; adds new list
     mov qword [r12 + N3TREE_ELEM_CENTER_OFFSET], rax
 .noList:
-    cmp qword [r12 + N3TREE_ELEM_LEFT_OFFSET], NULL
+    cmp qword [r12 + N3TREE_ELEM_LEFT_OFFSET], NULL         ; deletes left branch if exists
     je .noLeft
     push r12
     push r13
@@ -875,7 +861,7 @@ searchAndRemoveEQ:
     pop r13
     pop r12
 .noLeft:
-    cmp qword [r12 + N3TREE_ELEM_RIGHT_OFFSET], NULL
+    cmp qword [r12 + N3TREE_ELEM_RIGHT_OFFSET], NULL        ; deletes left branch if exists
     je .noRight
     push r12
     push r13
@@ -888,6 +874,7 @@ searchAndRemoveEQ:
     pop r12
     pop rbp
     ret
+
 
 n3treeDelete:
     ; rdi <-- n3tree_t* t
@@ -902,15 +889,15 @@ n3treeDelete:
     mov r13, rsi
     mov r14, rdi
 
-    cmp qword [r12 + N3TREE_FIRST_OFFSET], NULL
+    cmp qword [r12 + N3TREE_FIRST_OFFSET], NULL     ; check empty n3tree
     je .end
 
 .useFuncDelete:
     ; r13 = funcDelete
-    mov r12, qword [r12 + N3TREE_FIRST_OFFSET]
+    mov r12, qword [r12 + N3TREE_FIRST_OFFSET]      ; function to delete nodes
     call deleteAllNodes
 
-.end:
+.end:                                               ; finally free *n3tree memory
     mov rdi, r14
     call free
     add rsp, 8
@@ -933,7 +920,7 @@ deleteAllNodes:
 
     mov r14, r12
     mov rdi, qword [r12 + N3TREE_ELEM_DATA_OFFSET]
-    cmp r13, NULL
+    cmp r13, NULL                                           ; si funcdelete es 0 no se borra data
     je .dontdelete
     call r13
 .dontdelete:
@@ -943,7 +930,7 @@ deleteAllNodes:
     mov rsi, r13
     call listDelete
 .noList:
-    cmp qword [r12 + N3TREE_ELEM_LEFT_OFFSET], NULL
+    cmp qword [r12 + N3TREE_ELEM_LEFT_OFFSET], NULL         ; delete left y right recursivamente
     je .noLeft
     mov r12, qword [r12 + N3TREE_ELEM_LEFT_OFFSET]
     call deleteAllNodes
@@ -965,27 +952,28 @@ deleteAllNodes:
     pop rbp
     ret
 
+
 nTableNew:
+    ; edi <-- uint32_t size
     push rbp
     mov rbp, rsp
     push r12
     push r13
     push r14
     push r15
-    shl rdi, 32
-    shr rdi, 32
-    mov r12, rdi                                    ; r12 size
+
+    mov r12d, edi                                       ; r12 size (la parte alta se elimina)
     mov rdi, NTABLE_SIZE
     call malloc
     mov qword [rax + NTABLE_SIZE_OFFSET], r12
-    mov r13, rax                                    ; r13 *ntable
+    mov r13, rax                                        ; r13 <-- *ntable
 
     ; r12 size
     ; r13 *ntable
-    shl r12, 3
+    shl r12, 3                                          ; r12 <-- cantidad de slots en bytes
     mov rdi, r12
     call malloc
-    mov r14, rax                                    ; r14 **listarray
+    mov r14, rax                                        ; r14 **listarray
 
     ; r12 size * 8
     ; r13 *ntable
@@ -1010,32 +998,34 @@ nTableNew:
     pop rbp
     ret
 
+
 nTableAdd:
     ; rdi <-- ntable*
-    ; rsi <-- slot
+    ; esi <-- slot
     ; rdx <-- data*
     ; rcx <-- funcCmp*
     push rbp
     mov rbp, rsp
     push r12
     sub rsp, 8
-    shl rsi, 32
-    shr rsi, 32
 
     push rdx
     push rcx
     xor rdx, rdx
-    mov rax, rsi
-    mov rcx, qword [rdi + NTABLE_SIZE_OFFSET]
+    mov eax, esi
+    mov ecx, dword [rdi + NTABLE_SIZE_OFFSET]       ; busco tener en rsi <-- rsi % ntable.size
     div ecx
     mov esi, edx
     pop rcx
     pop rdx
 
     mov r12, qword [rdi + NTABLE_LIST_OFFSET]
-    shl rsi, 3
-    ;(nTable_t* t, uint32_t slot, void* data, funcCmp_t* fc)
-    ;listAdd(list_t* l, void* data, funcCmp_t* fc)
+    shl rsi, 3                                      ; slot offset en bytes
+    
+    ;listAdd
+    ;rdi <-- list_t* l
+    ;rsi <-- void* data
+    ;rdx <-- funcCmp_t* fc
     mov rdi, qword [r12 + rsi]
     mov rsi, rdx
     mov rdx, rcx
@@ -1045,63 +1035,62 @@ nTableAdd:
     pop rbp
     ret
     
+
 nTableRemoveSlot:
-;(nTable_t* t, uint32_t slot, void* data, funcCmp_t* fc,
- ;     funcDelete_t* fd)
     ; rdi <-- nTable_t* t
-    ; rsi <-- uint32_t slot
+    ; esi <-- uint32_t slot
     ; rdx <-- void* data
     ; rcx <-- funcCmp_t* fc
     ; r8  <-- funcDelete_t* fd
     push rbp
     mov rbp, rsp
-    shl rsi, 32
-    shr rsi, 32
     
     push rdx
     push rcx
     xor rdx, rdx
-    mov rax, rsi
-    mov rcx, qword [rdi + NTABLE_SIZE_OFFSET]
+    mov eax, esi
+    mov ecx, dword [rdi + NTABLE_SIZE_OFFSET]       ; busco rsi <-- rsi % table.size
     div ecx
     mov esi, edx
     pop rcx
     pop rdx
 
     mov rax, qword [rdi + NTABLE_LIST_OFFSET]
-    shl rsi, 3
-    add rax, rsi
-    ;listRemove(list_t* l, void* data, funcCmp_t* fc, funcDelete_t* fd)
-    mov rdi, qword [rax]
+    shl rsi, 3                                      ; size offset en bytes
+
+    mov rdi, qword [rax + rsi]
     mov rsi, rdx
     mov rdx, rcx
     mov rcx, r8
+    ;listRemove(list_t* l, void* data, funcCmp_t* fc, funcDelete_t* fd)
     call listRemove
     pop rbp
     ret
     
-nTableDeleteSlot:       ;(nTable_t* t, uint32_t slot, funcDelete_t* fd)
+
+nTableDeleteSlot:
+    ; rdi <-- nTable_t* t
+    ; rsi <-- uint32_t slot
+    ; rdx <-- funcDelete_t* fd
     push rbp
     mov rbp, rsp
     push r12
     sub rsp, 8
-    shl rsi, 32
-    shr rsi, 32
 
     push rdx
     push rcx
     xor rdx, rdx
-    mov rax, rsi
-    mov rcx, qword [rdi + NTABLE_SIZE_OFFSET]
+    mov eax, esi
+    mov ecx, dword [rdi + NTABLE_SIZE_OFFSET]       ; busco rsi <-- rsi % table.size
     div ecx
     mov esi, edx
     pop rcx
     pop rdx
 
     mov r12, qword [rdi + NTABLE_LIST_OFFSET]
-    shl rsi, 3
-    add r12, rsi
-    ;listDelete(list_t* l, funcDelete_t* fd)
+    shl rsi, 3                                      ; slot offset en bytes
+    add r12, rsi                                    ; lo sumo a r12 para preservarlo
+
     mov rdi, qword [r12]
     mov rsi, rdx
     call listDelete
@@ -1132,20 +1121,19 @@ nTableDelete:
     mov r13, qword [rdi + NTABLE_SIZE_OFFSET]
     xor r14, r14
     mov r15, rdi
-.loop:
-    cmp r14, r13
+.nextSlot:
+    cmp r14, r13                                ; check if last slot
     je .end
-    mov rdi, qword [r12 + r14 * 8]
+    mov rdi, qword [r12 + r14 * 8]              ; get slot's list
     mov rsi, rbx
     call listDelete
-.next:
     inc r14
-    jmp .loop
+    jmp .nextSlot
 .end:
-    mov rdi, r12
+    mov rdi, r12                                ; delete table
     call free
     mov rdi, r15
-    call free
+    call free                                   ; delete pointer to table
 
     add rsp, 8
     pop r15

@@ -3,17 +3,14 @@
 /** STRING **/
 
 char* strRange(char* a, uint32_t i, uint32_t f) {
-    // Ejemplos: strRange("ABC", 1, 1) → "B",
-    // strRange("ABC", 10, 0) → "ABC",
-    // strRange("ABC", 2, 10) → "C"
     int len_a = strLen(a);
     char* newStr;
     
-    // Si i>f, retorna el mismo string pasado por par ́ametro
+    // Si i>f, retorna el mismo string pasado por parametro
     if (i > f) {
         return a;
     }
-    // si i>len, entonces retorna la string vac ́ıa
+    // si i>len, entonces retorna la string vacıa
     if (i > len_a) {
         newStr = strClone("");
         free(a);
