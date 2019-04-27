@@ -3,7 +3,7 @@
 /** STRING **/
 
 char* strRange(char* a, uint32_t i, uint32_t f) {
-    int len_a = strLen(a);
+    uint32_t len_a = strLen(a);
     char* newStr;
     
     // Si i>f, retorna el mismo string pasado por parametro
@@ -19,9 +19,9 @@ char* strRange(char* a, uint32_t i, uint32_t f) {
     
     // Genera un nuevo string tomando los caracteres del  ́ındice i al f inclusive
     // Si f>len, se tomar ́a como l ́ımite superior la longitud del string
-    int new_len = f <= len_a ? f - i + 1 : len_a - i;
+    uint32_t new_len = f <= len_a ? f - i + 1 : len_a - i;
     newStr = new_len > 0 ? malloc(new_len + 1) : malloc(len_a + 1);
-    int c = 0;
+    uint32_t c = 0;
     while (c < new_len)
     {
         newStr[c++] = a[i++];

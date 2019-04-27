@@ -97,30 +97,30 @@ void test(){
     // Testing strConcat
     char* cc = strConcat(strClone(test), strClone(cmp));
     assert(strcmp(cc, "hola mundo!") == 0);
-    printf("%s\n",cc);
+    // printf("%s\n",cc);
     strDelete(cc);
 
     char* empty_str = "";
     
     char* cc1 = strConcat(strClone(empty_str), strClone(empty_str));
     assert(strcmp(cc1, empty_str) == 0);
-    printf("%s\n",cc1);
+    // printf("%s\n",cc1);
     strDelete(cc1);
 
     char* non_empty_str = "hello world";
     
     char* cc2 = strConcat(strClone(empty_str), strClone(non_empty_str));
     assert(strcmp(cc2, non_empty_str) == 0);
-    printf("%s\n",cc2);
+    // printf("%s\n",cc2);
     strDelete(cc2);
 
     char* cc3 = strConcat(strClone(non_empty_str), strClone(empty_str));
     assert(strcmp(cc3, non_empty_str) == 0);
-    printf("%s\n",cc3);
+    // printf("%s\n",cc3);
     strDelete(cc3);
 
     // Testing strPrint
-    FILE* pFile = fopen("file", "a");
+    FILE* pFile = fopen("salida.casos.extra.txt", "a");
     char* empty_str_cloned = strClone(empty_str);
     strPrint(empty_str_cloned,pFile);
     strDelete(empty_str_cloned);
@@ -202,7 +202,7 @@ void test(){
     // Testing N3TREE new
     n3tree_t* n3tree_test = n3treeNew();
     n3treeAdd(n3tree_test, strClone("1"),(funcCmp_t*)&strCmp);
-    printf("tree is in %p and points to %p\n", n3tree_test, n3tree_test->first);
+    // printf("tree is in %p and points to %p\n", (void *) n3tree_test, (void *) n3tree_test->first);
 
     // Test Remove Eq
     n3treeAdd(n3tree_test, strClone("2"),(funcCmp_t*)&strCmp);
@@ -215,7 +215,7 @@ void test(){
     n3treeAdd(n3tree_test, strClone("3"),(funcCmp_t*)&strCmp);
     n3treeAdd(n3tree_test, strClone("3"),(funcCmp_t*)&strCmp);
     n3treeAdd(n3tree_test, strClone("9"),(funcCmp_t*)&strCmp);
-    printf("tree is in %p and points to %p\n", n3tree_test, n3tree_test->first);
+    // printf("tree is in %p and points to %p\n", (void *) n3tree_test, (void *) n3tree_test->first);
 
     // Test delete
     n3treeDelete(n3tree_test,(funcDelete_t*)&strDelete);
@@ -247,11 +247,9 @@ void test(){
     nTableDelete(n, 0);
 }
 
-void breakpoint() {};
-
 void test_n3tree(FILE *pfile){
     n3tree_t* n3t = n3treeNew();
-    char* strings[10] = {"1","2","3","1","2","3","1","2","3","4","5"};
+    char* strings[10] = {"1","2","3","1","2","3","1","2","3","4"};
     for(int i = 0; i < 10; ++i)
     {
         n3treeAdd(n3t, strClone(strings[i]), (funcCmp_t*)&strCmp);
@@ -267,24 +265,48 @@ void test_nTable(FILE *pfile){
     {
         nTableAdd(nt, i, strClone(strings[i % 10]), (funcCmp_t*) &strCmp);
     }
-    // nTablePrint(nt, pfile, (funcPrint_t*) &strPrint);
+    nTablePrint(nt, pfile, (funcPrint_t*) &strPrint);
     nTableDelete(nt, (funcDelete_t*)&strDelete);
 }
 
-void examine_ntable(nTable_t* t, int size)
+void examine_str(char* str)
 {
-    printf("Examine ntable at: %p with value %p\n", &t, t);
-    printf("List array at %p\n", t->listArray);
-    printf("Of size %i\n", t->size);
-    if (t == NULL) return;
-    list_t** first = t->listArray;
+    printf("%15p\t%15s\n", str, str);
+}
 
-    for (int i = 0; i < size; ++i)
-    {
-        printf("Slot %i points at %p\n", i, first);
-        examine_list(*first);
-        first = (list_t**) (8 + (int) first);
+void examine_list(list_t* l)
+{
+    // printf("\tList at: %p\t\t\n", l);
+    printf("\t\tFirst at: %p\t is:\t%p\n", (void*) &l->first, (void*) l->first);
+    printf("\t\tLast at: %p\t is:\t%p\n", (void*) &l->last, (void*) l->last);
+    
+
+    listElem_t* elem = l->first;
+    if (elem != NULL) {
+        printf("\t\t\tElem->data at: %p\t addr: %p\tis %s\n", (void*) &elem->data, elem->data, (char*) elem->data);
+        printf("\t\t\tElem->next at: %p\t addr: %p\t\n", (void*) &elem->next, (void*) elem->next);
+        printf("\t\t\tElem->prev at: %p\t addr: %p\t\n", (void*) &elem->prev, (void*) elem->prev);
+        printf("\n");
+        elem = elem->next;
     }
+
+    while (elem != NULL) {
+        printf("\t\t\tElem->data at: %p\t addr: %p\tis %s\n", (void*) &elem->data, elem->data, (char*) elem->data);
+        printf("\t\t\tElem->next at: %p\t addr: %p\t\n", (void*) &elem->next, (void*) elem->next);
+        printf("\t\t\tElem->prev at: %p\t addr: %p\t\n", (void*) &elem->prev, (void*) elem->prev);
+        printf("\n");
+        elem = elem->next;
+    }
+}
+
+void print_tri(n3treeElem_t* elem)
+{   
+    if (elem == NULL) return;
+    printf("\tData at %p\t has: %p\t is: %s\n", (void*) &elem->data, (void*) elem->data, (char*) elem->data);
+    printf("\tLeft at %p\t has: %p\n", (void*) &elem->left, (void*) elem->left);
+    printf("\tCenter at %p\t has: %p\n", (void*) &elem->center, (void*) elem->center);
+    examine_list(elem->center);
+    printf("\tRight at %p\t has: %p\n", (void*) &elem->right, (void*) elem->right);
 }
 
 void examine_tree(n3treeElem_t* elem)
@@ -296,55 +318,20 @@ void examine_tree(n3treeElem_t* elem)
     examine_tree(elem->right);
 }
 
-void print_tri(n3treeElem_t* elem)
-{   
-    if (elem == NULL) return;
-    printf("\tData at %p\t has: %p\t is: %s\n", &elem->data, elem->data, elem->data);
-    printf("\tLeft at %p\t has: %p\n", &elem->left, elem->left);
-    printf("\tCenter at %p\t has: %p\n", &elem->center, elem->center);
-    examine_list(elem->center);
-    printf("\tRight at %p\t has: %p\n", &elem->right, elem->right);
-}
-
-void examine_list(list_t* l)
+void examine_ntable(nTable_t* t, int size)
 {
-    // printf("\tList at: %p\t\t\n", l);
-    printf("\t\tFirst at: %p\t is:\t%p\n", &l->first, l->first);
-    printf("\t\tLast at: %p\t is:\t%p\n", &l->last, l->last);
-    
+    printf("Examine ntable at: %p with value %p\n", (void *) &t, (void *) t);
+    printf("List array at %p\n", (void *) t->listArray);
+    printf("Of size %i\n", t->size);
+    if (t == NULL) return;
+    list_t** first = t->listArray;
 
-    listElem_t* elem = l->first;
-    if (elem != NULL) {
-        printf("\t\t\tElem->data at: %p\t addr: %p\tis %s\n", &elem->data, elem->data, elem->data);
-        printf("\t\t\tElem->next at: %p\t addr: %p\t\n", &elem->next, elem->next);
-        printf("\t\t\tElem->prev at: %p\t addr: %p\t\n", &elem->prev, elem->prev);
-        printf("\n");
-        elem = elem->next;
+    for (int i = 0; i < size; ++i)
+    {
+        printf("Slot %i points at %p\n", i, (void *) first);
+        examine_list(*first);
+        first = (list_t**) (8 + (long) first);
     }
-
-    while (elem != NULL) {
-        printf("\t\t\tElem->data at: %p\t addr: %p\tis %s\n", &elem->data, elem->data, elem->data);
-        printf("\t\t\tElem->next at: %p\t addr: %p\t\n", &elem->next, elem->next);
-        printf("\t\t\tElem->prev at: %p\t addr: %p\t\n", &elem->prev, elem->prev);
-        printf("\n");
-        elem = elem->next;
-    }
-}
-
-void examine_str(char* str)
-{
-    printf("%15p\t%15s\n", str);
-}
-
-int main (void){
-    FILE *pfile = fopen("salida.caso.propios.txt","w");
-    strRangeTest();
-    test();
-    test_n3tree(pfile);
-    test_nTable(pfile);
-    fclose(pfile);
-    // n3treeRemoveTest();
-    return 0;
 }
 
 void strRangeTest() {
@@ -356,6 +343,19 @@ void strRangeTest() {
     }
 }
 
+int main (void){
+    FILE *pfile = fopen("salida.caso.propios.txt","w");
+    // strRangeTest();
+    test();
+    test_n3tree(pfile);
+    test_nTable(pfile);
+    fclose(pfile);
+    // n3treeRemoveTest();
+    return 0;
+}
+
+
+
 void n3treeRemoveTest() {
     n3tree_t* n3t = n3treeNew();
     char* strings[25] = {"1","1","1","1","0","0","0","2","2","2","2","3","3","3","3","4","4","5","5","5","5","6","7","7","7"};
@@ -363,8 +363,8 @@ void n3treeRemoveTest() {
     {
         n3treeAdd(n3t, strClone(strings[i]), (funcCmp_t*)&strCmp);
     }
-    examine_tree(n3t->first);
+    // examine_tree(n3t->first);
     n3treeRemoveEq(n3t, (funcDelete_t*)&strDelete);
-    examine_tree(n3t->first);
+    // examine_tree(n3t->first);
     n3treeDelete(n3t,(funcDelete_t*)&strDelete);
 }
